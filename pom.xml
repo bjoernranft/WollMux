@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.muenchen</groupId>
 	<artifactId>wollmux</artifactId>
@@ -239,7 +241,8 @@
 						<configuration>
 							<target>
 								<move file="dist/WollMux.zip" tofile="dist/WollMux.oxt" />
-								<move file="dist/WollMux-AOO.zip" tofile="dist/WollMux-AOO.oxt" />
+								<move file="dist/WollMux-AOO.zip"
+									tofile="dist/WollMux-AOO.oxt" />
 							</target>
 						</configuration>
 						<goals>
@@ -313,6 +316,74 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
 				<version>2.5.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.gmavenplus</groupId>
+				<artifactId>gmavenplus-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<scripts>
+								<script><![CDATA[
+                        def typeScanner = new org.reflections.scanners.SubTypesScanner(false)
+                        def memberScanner = new org.reflections.scanners.MemberUsageScanner()
+                        def reflections = new org.reflections.Reflections("com.sun.star.*", "de.muenchen.*", typeScanner, memberScanner)
+                        reflections.getAllTypes().each{ value ->
+                        	println value
+                        	def c = org.reflections.ReflectionUtils.forName(value)
+                        	if (c != null && c.getCanonicalName() != null && c.getCanonicalName().startsWith("com.sun.star") && !c.getCanonicalName().contains("connections.pipe")) {
+	                            org.reflections.ReflectionUtils.getMethods(c).each{ m ->
+	                    			def calls = reflections.getMethodUsage(m)
+	                    			if (calls != null) {
+		                    			calls.removeAll { it ->
+		                    				def cl = it.getDeclaringClass()
+		                    				cl == null || cl.getName().startsWith("com.sun.star") || cl.getName().startsWith("null")
+		                    			}
+			                    		if (!calls.isEmpty()) {
+			                    			if (m != null && m.getDeclaringClass() != null) {
+			                    				println m.getDeclaringClass().getCanonicalName() + "." + m.getName() + ": " + calls.size()
+			                    			} else {
+			                    				println "unknown." + m.getName() + ": " + calls.size()
+			                    			}
+			                    			calls.each{ u ->
+			                    				if (u != null && u.getDeclaringClass() != null) {
+			                    					println "     " + u.getDeclaringClass().getCanonicalName() + "." + u.getName()
+			                    				} else {
+			                    					println "     unknown." + u.getName()
+			                    				}
+			                    			}
+			                    		}
+			                    	}
+	                    		}
+	                    	}
+                        }
+                    ]]></script>
+							</scripts>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.reflections</groupId>
+						<artifactId>reflections</artifactId>
+						<version>0.9.11</version>
+					</dependency>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-all</artifactId>
+						<version>2.4.15</version>
+					</dependency>
+					<dependency>
+						<groupId>dom4j</groupId>
+						<artifactId>dom4j</artifactId>
+						<version>1.6</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -444,7 +515,7 @@
 		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>wollmux-support-classes</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>de.muenchen</groupId>
