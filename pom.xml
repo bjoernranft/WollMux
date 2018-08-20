@@ -328,42 +328,54 @@
 							<goal>execute</goal>
 						</goals>
 						<configuration>
-							<scripts>
-								<script><![CDATA[
-                        def typeScanner = new org.reflections.scanners.SubTypesScanner(false)
-                        def memberScanner = new org.reflections.scanners.MemberUsageScanner()
-                        def reflections = new org.reflections.Reflections("com.sun.star.*", "de.muenchen.*", typeScanner, memberScanner)
-                        reflections.getAllTypes().each{ value ->
-                        	println value
-                        	def c = org.reflections.ReflectionUtils.forName(value)
-                        	if (c != null && c.getCanonicalName() != null && c.getCanonicalName().startsWith("com.sun.star") && !c.getCanonicalName().contains("connections.pipe")) {
-	                            org.reflections.ReflectionUtils.getMethods(c).each{ m ->
-	                    			def calls = reflections.getMethodUsage(m)
-	                    			if (calls != null) {
-		                    			calls.removeAll { it ->
-		                    				def cl = it.getDeclaringClass()
-		                    				cl == null || cl.getName().startsWith("com.sun.star") || cl.getName().startsWith("null")
-		                    			}
-			                    		if (!calls.isEmpty()) {
-			                    			if (m != null && m.getDeclaringClass() != null) {
-			                    				println m.getDeclaringClass().getCanonicalName() + "." + m.getName() + ": " + calls.size()
-			                    			} else {
-			                    				println "unknown." + m.getName() + ": " + calls.size()
-			                    			}
-			                    			calls.each{ u ->
-			                    				if (u != null && u.getDeclaringClass() != null) {
-			                    					println "     " + u.getDeclaringClass().getCanonicalName() + "." + u.getName()
-			                    				} else {
-			                    					println "     unknown." + u.getName()
-			                    				}
-			                    			}
-			                    		}
-			                    	}
-	                    		}
-	                    	}
-                        }
-                    ]]></script>
-							</scripts>
+						  <scripts>
+                <script>
+                  <![CDATA[
+def typeScanner = new org.reflections.scanners.SubTypesScanner(false)
+def memberScanner = new org.reflections.scanners.MemberUsageScanner()
+def config = org.reflections.util.ConfigurationBuilder.build(
+  "com.sun.star.*", "de.muenchen.*", typeScanner, memberScanner)
+def reflections = new org.reflections.Reflections(config)
+def scanned = new HashSet<String>()
+reflections.getAllTypes().each{ value ->
+  try {
+    def c = org.reflections.ReflectionUtils.forName(value)
+    if (c != null && c.getCanonicalName() != null && c.getCanonicalName().startsWith("com.sun.star") && !c.getCanonicalName().contains("connections.pipe")) {
+      org.reflections.ReflectionUtils.getMethods(c).each{ m ->
+        def name = ""
+        if (m != null && m.getDeclaringClass() != null) {
+          name = m.getDeclaringClass().getCanonicalName() + ";" + m.getName()
+        } else {
+          name = "unknown;" + m.getName()
+        }
+        if (!scanned.contains(name)) {
+	        scanned.add(name)
+	        def calls = reflections.getMethodUsage(m)
+	        if (calls != null) {
+	          calls.removeAll { it ->
+	            def cl = it.getDeclaringClass()
+	            cl == null || cl.getName().startsWith("com.sun.star") || cl.getName().startsWith("null")
+	          }
+	          if (!calls.isEmpty()) {
+	            println name +  ";" + calls.size()
+	            calls.each{ u ->
+	              if (u != null && u.getDeclaringClass() != null) {
+	                // println "     " + u.getDeclaringClass().getCanonicalName() + "." + u.getName()
+	              } else {
+	                // println "     unknown." + u.getName()
+	              }
+	            }
+	          }
+	        }
+	      }
+      }
+    } 
+  } catch (Error | Exception er) {
+  }
+}
+                  ]]>
+                </script>
+						  </scripts>
 						</configuration>
 					</execution>
 				</executions>
@@ -515,7 +527,7 @@
 		<dependency>
 			<groupId>de.muenchen</groupId>
 			<artifactId>wollmux-support-classes</artifactId>
-			<version>1.0.2-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>de.muenchen</groupId>

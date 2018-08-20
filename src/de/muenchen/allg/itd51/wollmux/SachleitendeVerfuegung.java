@@ -222,7 +222,8 @@ public class SachleitendeVerfuegung {
             cursor.setString("\r" + abdruckString(count) + "\r");
             // Falls Cursor auf dem Zeilenanfang stand, wird die Formatierung auf
             // Standardformatierung gesetzt
-            if (cursor.isStartOfParagraph()) formatDefault(cursor.getStart());
+            if (cursor.isStartOfParagraph())
+              formatDefault(cursor.getStart());
             cursor.gotoNextParagraph(false);
             cursor.gotoEndOfParagraph(true);
             formatAbdruck(cursor);
