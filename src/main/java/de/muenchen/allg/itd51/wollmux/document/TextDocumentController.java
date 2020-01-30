@@ -1080,7 +1080,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param visible
    *          If true shows the elements, otherwise hides the elements.
    */
-  public synchronized void setVisibleState(String groupId, boolean visible)
+  public void setVisibleState(String groupId, boolean visible)
   {
     try
     {
@@ -1107,7 +1107,8 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
         }
 
         // get new visibility state
-        boolean setVisible = groups.stream().map(groupState::get).reduce(Boolean::logicalAnd).orElse(true);
+        boolean setVisible = groups.stream().map(groupState::get).filter(Objects::nonNull).reduce(Boolean::logicalAnd)
+            .orElse(true);
 
         /*
          * remember first changed visibility to set the cursor to its position later cursor can't be

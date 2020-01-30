@@ -3,7 +3,10 @@ package de.muenchen.allg.itd51.wollmux.sidebar.layout;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.sun.star.awt.Rectangle;
+import com.sun.star.awt.XWindow;
 
 /**
  * Ein verticales Layout. Alle enthaltenen Layouts werden untereinander angeordnet.
@@ -14,6 +17,7 @@ import com.sun.star.awt.Rectangle;
  */
 public class VerticalLayout implements Layout
 {
+
   /**
    * Container für die enthaltenen Layouts.
    */
@@ -52,18 +56,27 @@ public class VerticalLayout implements Layout
   }
 
   @Override
-  public int layout(Rectangle rect)
+  public Pair<Integer, Integer> layout(Rectangle rect)
   {
-    int yOffset = marginTop;
+    int yOffset = 0;
 
     for (Map.Entry<Layout, Integer> entry : layouts.entrySet())
     {
-      yOffset += entry.getKey()
-          .layout(new Rectangle(rect.X, rect.Y + yOffset, rect.Width, rect.Height)) + marginBetween;
+      Pair<Integer, Integer> size = entry.getKey()
+          .layout(new Rectangle(rect.X, rect.Y + yOffset + marginTop, rect.Width, rect.Height));
+      if (size.getLeft() > 0)
+      {
+        yOffset += size.getLeft() + marginBetween;
+      }
     }
-    yOffset -= marginBetween;
 
-    return yOffset;
+    if (yOffset > 0)
+    {
+      yOffset -= marginBetween;
+      yOffset += marginTop;
+    }
+
+    return Pair.of(yOffset, rect.Width);
   }
 
   @Override
@@ -73,12 +86,25 @@ public class VerticalLayout implements Layout
   }
 
   @Override
-  public int getHeight()
+  public int getHeightForWidth(int width)
   {
-    int h = layouts.keySet().stream().mapToInt(Layout::getHeight).sum();
+    int h = layouts.keySet().stream().mapToInt(l -> l.getHeightForWidth(width)).sum();
     h += marginTop;
-    h += layouts.size() * marginBetween;
+    h += (layouts.size() - 1) * marginBetween;
+
     return h;
+  }
+
+  @Override
+  public int getMinimalWidth(int maxWidth)
+  {
+    return layouts.keySet().stream().mapToInt(l -> l.getMinimalWidth(maxWidth)).max().orElse(0);
+  }
+
+  @Override
+  public XWindow getControl()
+  {
+    throw new UnsupportedOperationException();
   }
 
 }

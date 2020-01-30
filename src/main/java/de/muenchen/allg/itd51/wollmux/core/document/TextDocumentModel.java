@@ -807,14 +807,6 @@ public class TextDocumentModel
   }
 
   /**
-   * Makiert dieses Dokument als Formulardokument (siehe {@link #isFormDocument()})
-   */
-  public void setFormDocument()
-  {
-    isFormDocument = true;
-  }
-
-  /**
    * Setzt abhängig von typeStr die NICHT PRESISTENTEN Zustände {@link #isTemplate()}
    * und {@link #isFormDocument()}, wenn es sich um einen der Dokumenttypen
    * normalTemplate, templateTemplate oder formDocument handelt.
@@ -937,7 +929,7 @@ public class TextDocumentModel
    *          Das Sichtbarkeitselement, auf dessen Anfang des Ankers der ViewCursor
    *          gesetzt werden soll.
    */
-  public synchronized void focusRangeStart(VisibilityElement visibleElement)
+  public void focusRangeStart(VisibilityElement visibleElement)
   {
     try
     {
