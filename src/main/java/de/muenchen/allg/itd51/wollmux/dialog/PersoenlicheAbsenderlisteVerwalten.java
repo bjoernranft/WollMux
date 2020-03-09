@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.sun.star.awt.Key;
+import com.sun.star.awt.KeyEvent;
 import com.sun.star.awt.MessageBoxResults;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XContainerWindowProvider;
@@ -70,6 +71,7 @@ import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XDialog;
 import com.sun.star.awt.XExtendedToolkit;
 import com.sun.star.awt.XKeyHandler;
+import com.sun.star.awt.XKeyListener;
 import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
@@ -206,6 +208,31 @@ public class PersoenlicheAbsenderlisteVerwalten
     XControlContainer controlContainer = UnoRuntime.queryInterface(XControlContainer.class, window);
 
     palListe = UNO.XListBox(controlContainer.getControl("palListe"));
+    XWindow palListeWnd = UNO.XWindow(palListe);
+    palListeWnd.addKeyListener(new XKeyListener()
+    {
+
+      @Override
+      public void disposing(EventObject arg0)
+      {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void keyReleased(KeyEvent arg0)
+      {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void keyPressed(KeyEvent arg0)
+      {
+        // TODO Auto-generated method stub
+
+      }
+    });
     palListe.setMultipleMode(true);
 
     searchResultList = UNO.XListBox(controlContainer.getControl("searchResultList"));
