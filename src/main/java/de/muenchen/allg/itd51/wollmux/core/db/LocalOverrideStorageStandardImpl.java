@@ -334,7 +334,7 @@ public class LocalOverrideStorageStandardImpl implements LocalOverrideStorage
      * Aktualisierte Daten abfragen bevor data geleert wird, damit im Falle eines Timeouts nicht der
      * Cache verloren geht.
      */
-    QueryResults res = database.getDatasetsByKey(keyToLOSDJDatasetList.keySet());
+    List<Dataset> res = database.getDatasetsByKey(keyToLOSDJDatasetList.keySet());
 
     /*
      * Schlüssel und Index des selektierten Datensatzes feststellen, bevor data geleert wird.

@@ -2,7 +2,6 @@ package de.muenchen.allg.itd51.wollmux.core.db;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -11,7 +10,7 @@ import java.util.List;
  * Dabei werden doppelte Ergebnisse herausgefiltert. Es handelt sich um eine mathematische Vereinigung.
  * @author daniel.sikeler
  */
-public class QueryResultsSet implements QueryResults
+public class QueryResultsSet
 {
   /**
    * Mathematische Vereinigung der QueryResults.
@@ -36,7 +35,7 @@ public class QueryResultsSet implements QueryResults
    * @param comparator Der Comparator, der beim Hinzufügen für Vergleiche verwendet wird.
    * @param queryResults Die Liste der neuen Datensätze.
    */
-  public QueryResultsSet(Comparator<Dataset> comparator, QueryResults queryResults)
+  public QueryResultsSet(Comparator<Dataset> comparator, List<Dataset> queryResults)
   {
     this(comparator);
     addAll(queryResults);
@@ -67,30 +66,12 @@ public class QueryResultsSet implements QueryResults
    * Fügt alle Datensätze der Liste hinzu, solange sie noch nicht enthalten sind.
    * @param queryResults Liste mit neuen Datensätzen.
    */
-  public void addAll(QueryResults queryResults)
+  public void addAll(List<Dataset> queryResults)
   {
     for (Dataset ds : queryResults)
     {
       add(ds);
     }
-  }
-
-  @Override
-  public int size()
-  {
-    return results.size();
-  }
-
-  @Override
-  public Iterator<Dataset> iterator()
-  {
-    return results.iterator();
-  }
-
-  @Override
-  public boolean isEmpty()
-  {
-    return results.isEmpty();
   }
 
 }

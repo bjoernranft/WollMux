@@ -11,8 +11,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
 /**
@@ -41,7 +41,7 @@ public abstract class DataFinder
    *          Das ConfigThingy, das die Suchabfrage beschreibt.
    * @return Die Anzahl der gefundenen Datensätze.
    */
-  public QueryResults find(ConfigThingy conf)
+  public List<Dataset> find(ConfigThingy conf)
   {
     List<Pair<String, String>> query = new ArrayList<>();
 
@@ -82,7 +82,7 @@ public abstract class DataFinder
    *
    * @return die Anzahl der gefundenen Datensätze
    */
-  public QueryResults find(List<Pair<String, String>> query)
+  public List<Dataset> find(List<Pair<String, String>> query)
   {
     for (Pair<String, String> pair : query)
     {

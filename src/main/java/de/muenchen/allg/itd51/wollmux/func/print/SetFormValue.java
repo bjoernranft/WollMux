@@ -19,8 +19,6 @@ import com.sun.star.lang.WrappedTargetException;
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsList;
 import de.muenchen.allg.itd51.wollmux.core.document.SimulationResults.SimulationResultsProcessor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
@@ -108,8 +106,7 @@ public class SetFormValue extends PrintFunction
     TextDocumentController documentController = DocumentManager
         .getTextDocumentController(pmod.getTextDocument());
 
-    QueryResults data = (QueryResults) pmod.getProp(PROP_QUERYRESULTS,
-        new QueryResultsList(Collections.emptyList()));
+    List<Dataset> data = (List<Dataset>) pmod.getProp(PROP_QUERYRESULTS, (Collections.emptyList()));
     @SuppressWarnings("unchecked")
     Collection<String> schema = (Collection<String>) pmod.getProp(PROP_SCHEMA,
         Collections.emptySet());
@@ -184,7 +181,7 @@ public class SetFormValue extends PrintFunction
    *          List of indices to select the data.
    * @return A map of the selected data. Key is the index, value is the data.
    */
-  private static Map<Integer, Dataset> getSelectedDatasets(QueryResults data,
+  private static Map<Integer, Dataset> getSelectedDatasets(List<Dataset> data,
       List<Integer> selection)
   {
     Map<Integer, Dataset> selected = new TreeMap<>();

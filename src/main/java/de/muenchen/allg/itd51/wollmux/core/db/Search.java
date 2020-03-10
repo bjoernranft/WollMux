@@ -75,18 +75,18 @@ public class Search
    *           falls eine Datenquelle, in der gesucht werden soll, nicht existiert
    * @return Results as an Iterable of Dataset as {@link QueryResults}
    */
-  public static QueryResults search(String queryString, SearchStrategy searchStrategy,
+  public static List<Dataset> search(String queryString, SearchStrategy searchStrategy,
       DatasourceJoiner dj, boolean useDjMainDatasource)
   {
     if (queryString == null || searchStrategy == null || dj == null)
     {
-      return null;
+      return new ArrayList<>();
     }
 
     List<Query> queries = parseQuery(searchStrategy, queryString);
 
-    QueryResults results = null;
-    List<QueryResults> listOfQueryResultsList = new ArrayList<>();
+    List<Dataset> results = null;
+    List<List<Dataset>> listOfQueryResultsList = new ArrayList<>();
 
     for (Query query : queries)
     {
@@ -100,6 +100,7 @@ public class Search
       }
       listOfQueryResultsList.add(results);
     }
+
     return mergeListOfQueryResultsList(listOfQueryResultsList);
   }
 
@@ -115,7 +116,7 @@ public class Search
    *          die virtuelle Datenbank (siehe {@link DatasourceJoiner}), in der gesucht werden soll
    * @return Results as an Iterable of Dataset as {@link QueryResults}
    */
-  public static QueryResults search(Map<String, String> query, DatasourceJoiner dj)
+  public static List<Dataset> search(Map<String, String> query, DatasourceJoiner dj)
   {
     List<QueryPart> parts = new ArrayList<>();
 
@@ -175,28 +176,17 @@ public class Search
    * 
    * @return bereinigte Ergebnisliste.
    */
-  private static QueryResults mergeListOfQueryResultsList(List<QueryResults> listOfQueryResultsList)
+  private static List<Dataset> mergeListOfQueryResultsList(
+      List<List<Dataset>> listOfQueryResultsList)
   {
-    QueryResultsSet results = new QueryResultsSet((o1, o2) -> {
-      if (o1.getClass() == o2.getClass() && o1.getKey() == o2.getKey())
-      {
-        return 0;
-      }
-      return 1;
-    });
+    List<Dataset> mergedLists = new ArrayList<>();
 
-    if (listOfQueryResultsList.size() == 1)
+    for (List<Dataset> queryResults : listOfQueryResultsList)
     {
-      return listOfQueryResultsList.get(0);
-    } else
-    {
-      for (QueryResults queryResults : listOfQueryResultsList)
-      {
-        results.addAll(queryResults);
-      }
+      mergedLists.addAll(queryResults);
     }
 
-    return results;
+    return mergedLists;
   }
 
   /**

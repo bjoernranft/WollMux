@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,8 +80,6 @@ import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.core.db.OOoDatasource;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel.FieldSubstitution;
 import de.muenchen.allg.itd51.wollmux.core.exceptions.UnavailableException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
@@ -295,7 +295,7 @@ public class MailMergeDatasource
    * Liefert den Inhalt der aktuell ausgewählten Serienbriefdatenquelle (leer, wenn keine
    * ausgewählt).
    */
-  public QueryResultsWithSchema getData()
+  public Pair<List<String>, List<Dataset>> getData()
   {
     try
     {
@@ -306,12 +306,12 @@ public class MailMergeDatasource
       case DB:
         return getDbData(getOOoDatasource());
       default:
-        return new QueryResultsWithSchema();
+        return new ImmutablePair<List<String>, List<Dataset>>(null, null);
       }
     } catch (Exception x)
     {
       LOGGER.error("", x);
-      return new QueryResultsWithSchema();
+      return new ImmutablePair<List<String>, List<Dataset>>(null, null);
     }
   }
 
@@ -778,7 +778,9 @@ public class MailMergeDatasource
     {
       if (rowIndex < 1)
         throw new IllegalArgumentException(L.m("Illegale Datensatznummer: %1", rowIndex));
-      QueryResults res = oooDatasource.getContents();
+
+      List<Dataset> res = oooDatasource.getContents();
+
       for (Dataset ds : res)
       {
         if (--rowIndex == 0)
@@ -894,22 +896,23 @@ public class MailMergeDatasource
    * Liefert den Inhalt der Tabelle tableName aus der OOo Datenquelle mit Namen oooDatasourceName.
    *
    */
-  private QueryResultsWithSchema getDbData(Datasource oooDatasource)
+  private Pair<List<String>, List<Dataset>> getDbData(Datasource oooDatasource)
   {
     List<String> schema = oooDatasource.getSchema();
-    QueryResults res = oooDatasource.getContents();
-    return new QueryResultsWithSchema(res, schema);
+    List<Dataset> res = oooDatasource.getContents();
+    return new ImmutablePair(res, schema);
   }
 
   /**
    * Liefert die sichtbaren Zellen aus der Tabelle tableName des Dokuments calcDoc als
    * QueryResultsWithSchema zurück.
    */
-  private QueryResultsWithSchema getSpreadsheetDocumentData(XSpreadsheetDocument calcDoc, String tableName)
+  private Pair<List<String>, List<Dataset>> getSpreadsheetDocumentData(XSpreadsheetDocument calcDoc,
+      String tableName)
   {
     List<String> schema = new ArrayList<>();
-    QueryResults res = getVisibleCalcData(calcDoc, tableName, schema);
-    return new QueryResultsWithSchema(res, schema);
+    CalcCellQueryResults res = getVisibleCalcData(calcDoc, tableName, schema);
+    return new ImmutablePair(res, schema);
   }
 
   /**
@@ -1372,7 +1375,7 @@ public class MailMergeDatasource
    * Die erste sichtbare Zeile der Calc-Tabelle wird herangezogen als Spaltennamen. Diese
    * Spaltennamen werden zu schema hinzugefügt.
    */
-  private static QueryResults getVisibleCalcData(XSpreadsheetDocument doc, String sheetName,
+  private static CalcCellQueryResults getVisibleCalcData(XSpreadsheetDocument doc, String sheetName,
       List<String> schema)
   {
     MailMergeDatasource.CalcCellQueryResults results = new CalcCellQueryResults();
@@ -1489,7 +1492,7 @@ public class MailMergeDatasource
     }
   }
 
-  private static class CalcCellQueryResults implements QueryResults
+  public static class CalcCellQueryResults implements Dataset
   {
     /**
      * Bildet einen Spaltennamen auf den Index in dem zu dem Datensatz gehörenden String[]-Array ab.
@@ -1497,24 +1500,6 @@ public class MailMergeDatasource
     private Map<String, Integer> mapColumnNameToIndex;
 
     private List<Dataset> datasets = new ArrayList<>();
-
-    @Override
-    public int size()
-    {
-      return datasets.size();
-    }
-
-    @Override
-    public Iterator<Dataset> iterator()
-    {
-      return datasets.iterator();
-    }
-
-    @Override
-    public boolean isEmpty()
-    {
-      return datasets.isEmpty();
-    }
 
     public void setColumnNameToIndexMap(Map<String, Integer> mapColumnNameToIndex)
     {
@@ -1550,6 +1535,20 @@ public class MailMergeDatasource
         return "key";
       }
 
+    }
+
+    @Override
+    public String get(String columnName) throws ColumnNotFoundException
+    {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    @Override
+    public String getKey()
+    {
+      // TODO Auto-generated method stub
+      return null;
     }
 
   }

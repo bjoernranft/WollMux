@@ -77,7 +77,6 @@ import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.db.Search;
 import de.muenchen.allg.itd51.wollmux.core.db.SearchStrategy;
 import de.muenchen.allg.itd51.wollmux.core.dialog.Dialog;
@@ -685,7 +684,7 @@ public class DatasourceSearchDialog implements Dialog
      * null wird interpretiert als leere Liste. list kann null sein (dann tut diese Funktion
      * nichts).
      */
-    private void setListElements(Listbox list, QueryResults data)
+    private void setListElements(Listbox list, List<Dataset> data)
     {
       if (list == null)
       {
@@ -795,7 +794,7 @@ public class DatasourceSearchDialog implements Dialog
       // Erzeugen eines Runnable-Objekts, das die Geschäftslogik enthält und nachher
       // an FrameWorker.disableFrameAndWork übergeben werden kann.
       Runnable r = () -> {
-        QueryResults results = null;
+        List<Dataset> results = null;
         try
         {
           results = Search.search(query.getString(), searchStrategy, dj, false);
@@ -813,7 +812,7 @@ public class DatasourceSearchDialog implements Dialog
         {
           // Wir benötigen finalResults, da eine nicht-finale Variable nicht in der
           // unten definierten anonymen Runnable-Klasse referenziert werden darf.
-          final QueryResults finalResults = results;
+          final List<Dataset> finalResults = results;
 
           // Folgendes muss im Event Dispatch Thread ausgeführt werden
           SwingUtilities.invokeLater(

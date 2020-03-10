@@ -39,12 +39,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.core.db.SchemaDatasource.RenameDataset;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
@@ -56,7 +56,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class SchemaDatasource implements Datasource
+public class SchemaDatasource implements Datasource<RenameDataset>
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SchemaDatasource.class);
@@ -202,19 +202,19 @@ public class SchemaDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<RenameDataset> getDatasetsByKey(Collection<String> keys)
   {
     return wrapDatasets(source.getDatasetsByKey(keys));
   }
 
   @Override
-  public QueryResults getContents()
+  public List<RenameDataset> getContents()
   {
-    return new QueryResultsList(new Vector<RenameDataset>(0));
+    return new ArrayList<>();
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query)
+  public List<RenameDataset> find(List<QueryPart> query)
   {
     List<QueryPart> translatedQuery = new ArrayList<>(query.size());
     Iterator<QueryPart> iter = query.iterator();
@@ -224,12 +224,12 @@ public class SchemaDatasource implements Datasource
       String spalte = p.getColumnName();
 
       if (!schema.contains(spalte)) // dieser Test ist nicht redundant wegen DROPs
-        return new QueryResultsList(new Vector<RenameDataset>(0));
+        return new ArrayList<>();
 
       String alteSpalte = mapNewToOld.get(spalte);
 
       if (alteSpalte == /* nicht equals()!!!! */EMPTY_COLUMN)
-        return new QueryResultsList(new Vector<RenameDataset>(0));
+        return new ArrayList<>();
 
       if (alteSpalte != null)
         translatedQuery.add(new QueryPart(alteSpalte, p.getSearchString()));
@@ -245,17 +245,17 @@ public class SchemaDatasource implements Datasource
     return name;
   }
 
-  private QueryResults wrapDatasets(QueryResults res)
+  private List<Dataset> wrapDatasets(List<Dataset> res)
   {
     List<RenameDataset> wrappedRes = new ArrayList<>(res.size());
     Iterator<Dataset> iter = res.iterator();
     while (iter.hasNext())
       wrappedRes.add(new RenameDataset(iter.next()));
 
-    return new QueryResultsList(wrappedRes);
+    return new ArrayList<>(wrappedRes);
   }
 
-  private class RenameDataset implements Dataset
+  public class RenameDataset implements Dataset
   {
     private Dataset ds;
 

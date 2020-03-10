@@ -129,7 +129,7 @@ public abstract class DJDatasetBase implements DJDataset
    * Liefert die Map, die dem Konstruktor als overrideStore Argument übergeben wurde.
    */
   public Map<String, String> getLOS()
-  { // TESTED
+  {
     return myLOS;
   }
 

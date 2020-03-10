@@ -38,7 +38,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.function.Predicate;
 
 import org.slf4j.Logger;
@@ -69,7 +68,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
-public class OverlayDatasource implements Datasource
+public class OverlayDatasource implements Datasource<Dataset>
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OverlayDatasource.class);
@@ -225,15 +224,15 @@ public class OverlayDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection, long)
    */
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<Dataset> getDatasetsByKey(Collection<String> keys)
   {
     return overlayColumns(source1.getDatasetsByKey(keys), DatasetPredicate.matchAll);
   }
 
   @Override
-  public QueryResults getContents()
+  public List<Dataset> getContents()
   {
-    return new QueryResultsList(new Vector<Dataset>(0));
+    return new ArrayList<>();
   }
 
   /*
@@ -242,11 +241,11 @@ public class OverlayDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
-  public QueryResults find(List<QueryPart> query)
+  public List<Dataset> find(List<QueryPart> query)
   {
     if (query.isEmpty())
     {
-      return new QueryResultsList(new ArrayList<Dataset>(0));
+      return new ArrayList<>();
     }
 
     List<QueryPart> queryOnly1 = new ArrayList<>();
@@ -281,7 +280,7 @@ public class OverlayDatasource implements Datasource
      */
     if (!queryOnly1.isEmpty())
     {
-      QueryResults results = source1.find(queryOnly1);
+      List<Dataset> results = source1.find(queryOnly1);
 
       List<QueryPart> restQuery = new ArrayList<>(queryOnly2.size() + queryBoth.size());
       restQuery.addAll(queryBoth);
@@ -324,8 +323,8 @@ public class OverlayDatasource implements Datasource
 
       Predicate<Dataset> predicate = DatasetPredicate.makePredicate(query);
 
-      QueryResults results1 = overlayColumns(source1.find(restrictingQuery), predicate);
-      QueryResults results2 = overlayColumnsReversed(source2.find(restrictingQuery), predicate);
+      List<Dataset> results1 = overlayColumns(source1.find(restrictingQuery), predicate);
+      List<Dataset> results2 = overlayColumnsReversed(source2.find(restrictingQuery), predicate);
 
       /*
        * An dieser Stelle haben wir alle gesuchten Datensätze. Allerdings kann es zwischen results1
@@ -360,7 +359,7 @@ public class OverlayDatasource implements Datasource
           finalResults.add(ds);
       }
 
-      QueryResults results3 = getDatasetsByKey(dupKeys);
+      List<Dataset> results3 = getDatasetsByKey(dupKeys);
 
       for (Dataset ds : results3)
         if (predicate.test(ds))
@@ -374,7 +373,7 @@ public class OverlayDatasource implements Datasource
           finalResults.add(ds);
         }
 
-      return new QueryResultsList(finalResults);
+      return finalResults;
     }
   }
 
@@ -432,7 +431,7 @@ public class OverlayDatasource implements Datasource
     return name;
   }
 
-  private QueryResults overlayColumns(QueryResults results, Predicate<Dataset> filter)
+  private List<Dataset> overlayColumns(List<Dataset> results, Predicate<Dataset> filter)
   {
     List<Dataset> resultsWithOverlayments = new ArrayList<>(results.size());
 
@@ -453,11 +452,11 @@ public class OverlayDatasource implements Datasource
         }
       }
 
-      QueryResults appendix = source2.find(query);
+      List<Dataset> appendix = source2.find(query);
 
       Dataset newDataset;
 
-      if (appendix.size() == 0)
+      if (appendix.isEmpty())
       {
         newDataset = new ConcatDataset(ds, null);
         if (filter.test(newDataset))
@@ -479,10 +478,10 @@ public class OverlayDatasource implements Datasource
       }
     }
 
-    return new QueryResultsList(resultsWithOverlayments);
+    return resultsWithOverlayments;
   }
 
-  private QueryResults overlayColumnsReversed(QueryResults results, Predicate<Dataset> filter)
+  private List<Dataset> overlayColumnsReversed(List<Dataset> results, Predicate<Dataset> filter)
   {
     List<ConcatDataset> resultsWithOverlayments = new ArrayList<>(results.size());
 
@@ -500,7 +499,7 @@ public class OverlayDatasource implements Datasource
         }
       }
 
-      QueryResults prependix = source1.find(query);
+      List<Dataset> prependix = source1.find(query);
 
       for (Dataset prepend : prependix)
       {
@@ -512,7 +511,7 @@ public class OverlayDatasource implements Datasource
       }
     }
 
-    return new QueryResultsList(resultsWithOverlayments);
+    return new ArrayList<>(resultsWithOverlayments);
   }
 
   private class ConcatDataset implements Dataset

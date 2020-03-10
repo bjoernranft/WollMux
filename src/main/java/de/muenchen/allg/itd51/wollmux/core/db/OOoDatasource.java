@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +59,7 @@ import com.sun.star.sdbcx.XColumnsSupplier;
 import com.sun.star.sdbcx.XKeysSupplier;
 
 import de.muenchen.allg.afid.UNO;
+import de.muenchen.allg.itd51.wollmux.core.db.OOoDatasource.OOoDataset;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -67,8 +67,11 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
 /**
  * Stellt eine OOo-Datenquelle als WollMux-Datenquelle zur Verfügung.
+ * @param <T>
+ * 
+ * @param <T>
  */
-public class OOoDatasource implements Datasource
+public class OOoDatasource implements Datasource<OOoDataset>
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OOoDatasource.class);
@@ -422,10 +425,10 @@ public class OOoDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<OOoDataset> getDatasetsByKey(Collection<String> keys)
   {
     if (keys.isEmpty()) {
-      return new QueryResultsList(new ArrayList<Dataset>(0));
+      return new ArrayList<>();
     }
 
     StringBuilder buffy =
@@ -460,14 +463,14 @@ public class OOoDatasource implements Datasource
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query)
+  public List<OOoDataset> find(List<QueryPart> query)
   {
     if (query.isEmpty()) {
-      return new QueryResultsList(new Vector<Dataset>(0));
+      return new ArrayList<>();
     }
 
     StringBuilder buffy =
-      new StringBuilder(this.SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
+        new StringBuilder(SQLSelectCommand + sqlIdentifier(oooTableName) + " WHERE ");
 
     Iterator<QueryPart> iter = query.iterator();
     boolean first = true;
@@ -508,7 +511,7 @@ public class OOoDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getContents()
+  public List<OOoDataset> getContents()
   {
     return sqlQuery(this.SQLSelectCommand + sqlIdentifier(oooTableName) + ";");
   }
@@ -516,7 +519,7 @@ public class OOoDatasource implements Datasource
   /**
    * Setzt die SQL-Anfrage query an die Datenbank ab und liefert die Resultate.
    */
-  private QueryResults sqlQuery(String query)
+  private <T> List<OOoDataset> sqlQuery(String query)
   {
     LOGGER.debug("sqlQuery(\"{}\")", query);
 
@@ -524,6 +527,8 @@ public class OOoDatasource implements Datasource
 
     XRowSet results = null;
     XConnection conn = null;
+
+    // TODO: äußere try catch entfernen
     try
     {
 
@@ -611,7 +616,7 @@ public class OOoDatasource implements Datasource
       }
     }
 
-    return new QueryResultsList(datasets);
+    return datasets;
 
   }
 
@@ -700,7 +705,7 @@ public class OOoDatasource implements Datasource
     return datasourceName;
   }
 
-  private class OOoDataset implements Dataset
+  public class OOoDataset implements Dataset
   {
     private Map<String, String> data;
 

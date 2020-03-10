@@ -39,7 +39,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
@@ -48,7 +47,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 /**
  * Datasource, die die Vereinigung 2er Datasources darstellt
  */
-public class UnionDatasource implements Datasource
+public class UnionDatasource implements Datasource<Dataset>
 {
   private Datasource source1;
 
@@ -147,21 +146,27 @@ public class UnionDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<Dataset> getDatasetsByKey(Collection<String> keys)
   {
-    return new QueryResultsUnion(source1.getDatasetsByKey(keys), source2.getDatasetsByKey(keys));
+    List<Dataset> src1 = source1.getDatasetsByKey(keys);
+    src1.addAll(source2.getDatasetsByKey(keys));
+
+    return src1;
   }
 
   @Override
-  public QueryResults getContents()
+  public List<Dataset> getContents()
   {
-    return new QueryResultsList(new Vector<Dataset>(0));
+    return new ArrayList<>();
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query)
+  public List<Dataset> find(List<QueryPart> query)
   {
-    return new QueryResultsUnion(source1.find(query), source2.find(query));
+    List<Dataset> src1 = source1.find(query);
+    src1.addAll(source2.find(query));
+
+    return src1;
   }
 
   @Override

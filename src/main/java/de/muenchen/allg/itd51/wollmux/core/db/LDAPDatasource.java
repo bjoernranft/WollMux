@@ -83,7 +83,7 @@ import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
  * 
  * @author Max Meier (D-III-ITD 5.1)
  */
-public class LDAPDatasource implements Datasource
+public class LDAPDatasource implements Datasource<Dataset>
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LDAPDatasource.class);
@@ -430,9 +430,9 @@ public class LDAPDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getContents()
+  public List<Dataset> getContents()
   {
-    return new QueryResultsList(new Vector<Dataset>(0));
+    return new ArrayList<>();
   }
 
   /*
@@ -441,11 +441,11 @@ public class LDAPDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection , long)
    */
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<Dataset> getDatasetsByKey(Collection<String> keys)
   {
     if (keys.isEmpty())
     {
-      return new QueryResultsList(new ArrayList<Dataset>(0));
+      return new ArrayList<>();
     }
 
     List<Dataset> results = new ArrayList<>(keys.size());
@@ -463,13 +463,13 @@ public class LDAPDatasource implements Datasource
         {
           List<QueryPart> query = keyToFindQuery(currentKey);
 
-          QueryResults res = find(query);
+          List<Dataset> res = find(query);
           for (Dataset ds : res)
             results.add(ds);
         }
       }
 
-      return new QueryResultsList(results);
+      return results;
     } finally
     {
       attributeCache.clear();
@@ -633,7 +633,7 @@ public class LDAPDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
-  public QueryResults find(List<QueryPart> query)
+  public List<Dataset> find(List<QueryPart> query)
   {
     StringBuilder searchFilter = new StringBuilder();
     List<RelativePaths> positiveSubtreePathLists = new ArrayList<>();
@@ -649,7 +649,7 @@ public class LDAPDatasource implements Datasource
 
       if (colDef == null)
       {
-        return new QueryResultsList(new Vector<Dataset>(0));
+        return new ArrayList<>();
       }
 
       String attributeName = colDef.attributeName;
@@ -947,7 +947,7 @@ public class LDAPDatasource implements Datasource
     if (searchFilter.length() == 0 && mergedPositiveSubtreePathLists == null
         && mergedNegativeSubtreePaths == null)
     {
-      return new QueryResultsList(new Vector<Dataset>(0));
+      return new ArrayList<>();
     }
 
     List<SearchResult> currentResultList = new ArrayList<>();
@@ -1035,7 +1035,7 @@ public class LDAPDatasource implements Datasource
       attributeCache.clear();
     }
 
-    return new QueryResultsList(results);
+    return results;
   }
 
   /**

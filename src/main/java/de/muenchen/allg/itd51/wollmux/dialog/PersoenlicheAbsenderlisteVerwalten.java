@@ -87,7 +87,6 @@ import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractWindowListener;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -543,7 +542,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     editEntry(newItemIndex);
   };
 
-  private void setLdapSearchResults(QueryResults data)
+  private void setLdapSearchResults(List<Dataset> data)
   {
     if (data == null)
     {
@@ -600,7 +599,7 @@ public class PersoenlicheAbsenderlisteVerwalten
     return resultSearchQuery;
   }
 
-  private void showInfoDialog(QueryResults ldapSearchResults)
+  private void showInfoDialog(List<Dataset> ldapSearchResults)
   {
     if (ldapSearchResults == null)
     {

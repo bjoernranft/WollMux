@@ -32,7 +32,6 @@ package de.muenchen.allg.itd51.wollmux.core.db;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -159,9 +158,14 @@ public class ColumnTransformer
    * Berechnung der {@link Dataset}s wird on-demand durchgeführt, d.h. spätere Aufrufe von
    * {@link #addTrafos(Map)} wirken sich auf die {@link Dataset}s der {@link QueryResults} aus.
    */
-  public QueryResults transform(QueryResults qres)
+  public List<Dataset> transform(List<Dataset> qres)
   {
-    return new TranslatedQueryResults(qres);
+    //return new TranslatedQueryResults(qres);
+    
+    for (Dataset ds : qres)
+    {
+      this.get(columnName, ds)
+    }
   }
 
   /**
@@ -214,73 +218,55 @@ public class ColumnTransformer
     }
   }
 
-  /**
-   * Wendet Spaltenumsetzungen auf QueryResults an und stellt das Ergebnis wieder als
-   * QueryResults zur Verfügung.
-   */
-  private class TranslatedQueryResults implements QueryResults
-  {
-    /**
-     * Die Original-{@link QueryResults}.
-     */
-    private QueryResults qres;
-
-    /**
-     * Die QueryResults res werden mit dem columnTransformer übersetzt.
-     */
-    public TranslatedQueryResults(QueryResults res)
-    {
-      qres = res;
-    }
-
-    @Override
-    public int size()
-    {
-      return qres.size();
-    }
-
-    @Override
-    public Iterator<Dataset> iterator()
-    {
-      return new Iter();
-    }
-
-    @Override
-    public boolean isEmpty()
-    {
-      return qres.isEmpty();
-    }
-
-    private class Iter implements Iterator<Dataset>
-    {
-      private Iterator<Dataset> iterator;
-
-      public Iter()
-      {
-        iterator = qres.iterator();
-      }
-
-      @Override
-      public boolean hasNext()
-      {
-        return iterator.hasNext();
-      }
-
-      @Override
-      public Dataset next()
-      {
-        Dataset ds = iterator.next();
-        return new TransformedDataset(ds);
-      }
-
-      @Override
-      public void remove()
-      {
-        iterator.remove();
-      }
-
-    }
-  }
+  // /**
+  // * Wendet Spaltenumsetzungen auf QueryResults an und stellt das Ergebnis wieder als
+  // * QueryResults zur Verfügung.
+  // */
+  // private class TranslatedQueryResults
+  // {
+  // /**
+  // * Die Original-{@link QueryResults}.
+  // */
+  // private List<Dataset> qres;
+  //
+  // /**
+  // * Die QueryResults res werden mit dem columnTransformer übersetzt.
+  // */
+  // public TranslatedQueryResults(List<Dataset> res)
+  // {
+  // qres = res;
+  // }
+  //
+  // private class Iter implements Iterator<Dataset>
+  // {
+  // private Iterator<Dataset> iterator;
+  //
+  // public Iter()
+  // {
+  // iterator = qres.iterator();
+  // }
+  //
+  // @Override
+  // public boolean hasNext()
+  // {
+  // return iterator.hasNext();
+  // }
+  //
+  // @Override
+  // public Dataset next()
+  // {
+  // Dataset ds = iterator.next();
+  // return new TransformedDataset(ds);
+  // }
+  //
+  // @Override
+  // public void remove()
+  // {
+  // iterator.remove();
+  // }
+  //
+  // }
+  // }
 
   private class TransformedDataset implements Dataset
   {

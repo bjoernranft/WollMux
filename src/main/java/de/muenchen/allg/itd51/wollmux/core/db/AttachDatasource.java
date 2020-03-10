@@ -38,7 +38,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.function.Predicate;
 
 import org.slf4j.Logger;
@@ -75,7 +74,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class AttachDatasource implements Datasource
+public class AttachDatasource implements Datasource<Dataset>
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AttachDatasource.class);
@@ -206,15 +205,15 @@ public class AttachDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util. Collection, long)
    */
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<Dataset> getDatasetsByKey(Collection<String> keys)
   {
     return attachColumns(source1.getDatasetsByKey(keys), DatasetPredicate.matchAll);
   }
 
   @Override
-  public QueryResults getContents()
+  public List<Dataset> getContents()
   {
-    return new QueryResultsList(new Vector<Dataset>(0));
+    return new ArrayList<>();
   }
 
   /*
@@ -223,7 +222,7 @@ public class AttachDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
-  public QueryResults find(List<QueryPart> query)
+  public List<Dataset> find(List<QueryPart> query)
   {
     List<QueryPart> query1 = new ArrayList<>(query.size() / 2);
     List<QueryPart> query2 = new ArrayList<>(query.size() / 2);
@@ -248,7 +247,7 @@ public class AttachDatasource implements Datasource
      */
     if (!query1.isEmpty())
     {
-      QueryResults results = source1.find(query1);
+      List<Dataset> results = source1.find(query1);
 
       return attachColumns(results, DatasetPredicate.makePredicate(query2WithPrefix));
     } else
@@ -268,7 +267,7 @@ public class AttachDatasource implements Datasource
     return name;
   }
 
-  private QueryResults attachColumns(QueryResults results, Predicate<Dataset> filter)
+  private List<Dataset> attachColumns(List<Dataset> results, Predicate<Dataset> filter)
   {
     List<Dataset> resultsWithAttachments = new ArrayList<>(results.size());
 
@@ -286,11 +285,11 @@ public class AttachDatasource implements Datasource
         }
       }
 
-      QueryResults appendix = source2.find(query);
+      List<Dataset> appendix = source2.find(query);
 
       Dataset newDataset;
 
-      if (appendix.size() == 0)
+      if (appendix.isEmpty())
       {
         newDataset = new ConcatDataset(ds, null);
         if (filter.test(newDataset))
@@ -311,10 +310,10 @@ public class AttachDatasource implements Datasource
       }
     }
 
-    return new QueryResultsList(resultsWithAttachments);
+    return new ArrayList<>(resultsWithAttachments);
   }
 
-  private QueryResults attachColumnsReversed(QueryResults results)
+  private List<Dataset> attachColumnsReversed(List<Dataset> results)
   {
     List<ConcatDataset> resultsWithAttachments = new ArrayList<>(results.size());
 
@@ -332,9 +331,9 @@ public class AttachDatasource implements Datasource
         }
       }
 
-      QueryResults prependix = source1.find(query);
+      List<Dataset> prependix = source1.find(query);
 
-      if (prependix.size() > 0)
+      if (!prependix.isEmpty())
       {
         for (Dataset ds1 : prependix)
         {
@@ -343,7 +342,7 @@ public class AttachDatasource implements Datasource
       }
     }
 
-    return new QueryResultsList(resultsWithAttachments);
+    return new ArrayList<>(resultsWithAttachments);
   }
 
   private class ConcatDataset implements Dataset

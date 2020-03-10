@@ -1,6 +1,7 @@
 package de.muenchen.allg.itd51.wollmux.core.db;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -19,12 +20,12 @@ public class AsyncLdapSearch
     this.dj = dj;
   }
 
-  public CompletableFuture<QueryResults> runLdapSearchAsync()
+  public CompletableFuture<List<Dataset>> runLdapSearchAsync()
   {
     return this.asyncLdapSearch;
   }
 
-  private CompletableFuture<QueryResults> asyncLdapSearch = CompletableFuture.supplyAsync(() -> {
+  private CompletableFuture<List<Dataset>> asyncLdapSearch = CompletableFuture.supplyAsync(() -> {
 
     if (searchQuery == null || dj == null)
       return null;

@@ -36,9 +36,9 @@ import java.util.List;
 import java.util.Map;
 
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnTransformer;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Datasource;
 import de.muenchen.allg.itd51.wollmux.core.db.QueryPart;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.dialog.DialogLibrary;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionFactory;
 import de.muenchen.allg.itd51.wollmux.core.functions.FunctionLibrary;
@@ -55,7 +55,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  * 
  * @author Matthias Benkmann (D-III-ITD-D101)
  */
-public class FunkyDatasource implements Datasource
+public class FunkyDatasource implements Datasource<Dataset>
 {
   private Datasource source;
 
@@ -137,19 +137,19 @@ public class FunkyDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<Dataset> getDatasetsByKey(Collection<String> keys)
   {
     return columnTransformer.transform(source.getDatasetsByKey(keys));
   }
 
   @Override
-  public QueryResults getContents()
+  public List<Dataset> getContents()
   {
     return columnTransformer.transform(source.getContents());
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query)
+  public List<Dataset> find(List<QueryPart> query)
   {
     return columnTransformer.transform(source.find(query));
   }

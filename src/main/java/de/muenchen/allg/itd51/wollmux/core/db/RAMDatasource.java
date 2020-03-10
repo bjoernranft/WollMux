@@ -35,15 +35,13 @@ package de.muenchen.allg.itd51.wollmux.core.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import java.util.function.Predicate;
 
 /**
  * Oberklasse für Datasources, die ihre Daten vollständig im Speicher halten
  */
-public class RAMDatasource implements Datasource
+public class RAMDatasource implements Datasource<Dataset>
 {
   /**
    * Das Schema dieser Datenquelle.
@@ -103,20 +101,19 @@ public class RAMDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<Dataset> getDatasetsByKey(Collection<String> keys)
   {
     List<Dataset> res = new ArrayList<>();
-    Iterator<Dataset> iter = data.iterator();
-    while (iter.hasNext())
+
+    for (Dataset ds : data)
     {
-      Dataset ds = iter.next();
       if (keys.contains(ds.getKey()))
       {
         res.add(ds);
       }
     }
 
-    return new QueryResultsList(res);
+    return res;
   }
 
   /*
@@ -125,11 +122,11 @@ public class RAMDatasource implements Datasource
    * @see de.muenchen.allg.itd51.wollmux.db.Datasource#find(java.util.List, long)
    */
   @Override
-  public QueryResults find(List<QueryPart> query)
+  public List<Dataset> find(List<QueryPart> query)
   {
     if (query.isEmpty())
     {
-      return new QueryResultsList(new Vector<Dataset>(0));
+      return new ArrayList<>();
     }
 
     Predicate<Dataset> pred = DatasetPredicate.makePredicate(query);
@@ -143,13 +140,13 @@ public class RAMDatasource implements Datasource
       }
     });
 
-    return new QueryResultsList(results);
+    return results;
   }
 
   @Override
-  public QueryResults getContents()
+  public List<Dataset> getContents()
   {
-    return new QueryResultsList(new Vector<>(data));
+    return new ArrayList<>(data);
   }
 
   /*

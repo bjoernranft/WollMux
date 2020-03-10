@@ -63,7 +63,7 @@ import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
  * implementieren - würde vermutlich dazu führen, dass Daten im LDAP schlechter gepflegt werden,
  * weil es einfacher ist, einen Override einzuführen
  */
-public interface Datasource
+public interface Datasource<T>
 {
   /**
    * Liefert eine Liste, die die Titel aller Spalten der Datenquelle enthält.
@@ -75,11 +75,13 @@ public interface Datasource
    * dass die Eindeutigkeit von Schlüsseln nur eine Empfehlung darstellt. Die Anzahl der
    * zurückgelieferten Datensätze kann also die Anzahl der übergebenen Schlüssel übersteigen.
    * 
+   * @param <T>
+   * 
    * @param keys
    *          Keys to search against.
    * @return Results as {@link QueryResults}
    */
-  public QueryResults getDatasetsByKey(Collection<String> keys);
+  public List<T> getDatasetsByKey(Collection<String> keys);
 
   /**
    * Liefert alle Datensätze, die alle Bedingungen von query (Liste von {@link QueryPart}s)
@@ -90,14 +92,14 @@ public interface Datasource
    *          Query to search against the main datasource.
    * @return Results as {@link QueryResults}
    */
-  public QueryResults find(List<QueryPart> query);
+  public List<T> find(List<QueryPart> query);
 
   /**
    * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle. Wenn möglich
    * sollte die Datenquelle hier all ihre Datensätze zurückliefern oder zumindest soviele wie
    * möglich. Es ist jedoch auch erlaubt, dass hier gar keine Datensätze zurückgeliefert werden.
    */
-  public QueryResults getContents();
+  public List<T> getContents();
 
   /**
    * Liefert den Namen dieser Datenquelle.
@@ -119,4 +121,5 @@ public interface Datasource
   {
     return source.get(key, ConfigurationErrorException.class, errorMessage.get()).toString();
   }
+
 }

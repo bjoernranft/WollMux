@@ -17,7 +17,7 @@ import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorage;
 import de.muenchen.allg.itd51.wollmux.db.DatasourceJoinerFactory;
 
 public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALChangeEventListener>
@@ -144,14 +144,13 @@ public class PersoenlicheAbsenderliste implements XPALProvider, Iterable<XPALCha
   public List<DJDataset> getSortedPALEntries()
   {
     // Liste der entries aufbauen.
-    QueryResults data = DatasourceJoinerFactory.getDatasourceJoiner().getLOS();
+    LocalOverrideStorage data = DatasourceJoinerFactory.getDatasourceJoiner().getLOS();
 
     List<DJDataset> listDataset = new ArrayList<>();
-    Iterator<Dataset> iter = data.iterator();
 
-    while (iter.hasNext())
+    for (Dataset ds : data)
     {
-      listDataset.add((DJDataset) iter.next());
+      listDataset.add((DJDataset) ds);
     }
 
     DatasourceJoinerFactory.getDatasourceJoiner();

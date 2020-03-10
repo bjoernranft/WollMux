@@ -178,7 +178,10 @@ public class DatasourceJoiner
       {
         LOGGER.error("Datenquelle {} nicht definiert => verwende alte Daten aus Cache",
             senderSource);
-        mainDatasource = new EmptyDatasource(schema, senderSource);
+        mainDatasource = new DummyDatasourceWithMessagebox(schema, senderSource); // TODO: war
+                                                                                  // eigentlich eine
+                                                                                  // EmptyDatasource
+                                                                                  // klasse
       } else
       {
         mainDatasource = new DummyDatasourceWithMessagebox(schema, senderSource);
@@ -307,7 +310,7 @@ public class DatasourceJoiner
    *           existiert.
    * @return Results as {@link QueryResults}
    */
-  public QueryResults find(Query query)
+  public List<Dataset> find(Query query)
   {
     Datasource source = nameToDatasource.get(query.getDatasourceName());
     if (source == null)
@@ -340,13 +343,13 @@ public class DatasourceJoiner
    *          Query to search against the main datasource.
    * @return Search results as {@link QueryResults}
    */
-  public QueryResults find(List<QueryPart> query)
+  public List<DJDatasetWrapper> find(List<QueryPart> query)
   {
-    QueryResults res = mainDatasource.find(query);
+    List<Dataset> res = mainDatasource.find(query);
     List<DJDatasetWrapper> djDatasetsList = StreamSupport.stream(res.spliterator(), false)
         .map(ds -> new DJDatasetWrapper(ds)).collect(Collectors.toList());
 
-    return new QueryResultsList(djDatasetsList);
+    return djDatasetsList;
   }
 
   /**
@@ -361,7 +364,7 @@ public class DatasourceJoiner
    *          Name of the datasource.
    * @return {@link QueryResults} All Datasets of the given data source.
    */
-  public QueryResults getContentsOf(String datasourceName)
+  public List<Dataset> getContentsOf(String datasourceName)
   {
     Datasource source = nameToDatasource.get(datasourceName);
     if (source == null)
@@ -379,13 +382,13 @@ public class DatasourceJoiner
    *
    * @return Datensätze aus der Datenquelle.
    */
-  public QueryResults getContentsOfMainDatasource()
+  public List<Dataset> getContentsOfMainDatasource()
   {
-    QueryResults res = mainDatasource.getContents();
+    List<Dataset> res = mainDatasource.getContents();
     List<DJDatasetWrapper> djDatasetsList = StreamSupport.stream(res.spliterator(), false)
         .map(ds -> new DJDatasetWrapper(ds)).collect(Collectors.toList());
 
-    return new QueryResultsList(djDatasetsList);
+    return new ArrayList<>(djDatasetsList);
   }
 
   /**
@@ -438,7 +441,7 @@ public class DatasourceJoiner
    *          Search results from a datasource as {@link QueryResults}.
    * @return Size of the param as {@link Integer}
    */
-  public int addToPAL(QueryResults results)
+  public int addToPAL(List<Dataset> results)
   {
     if (results == null || results.isEmpty())
     {
@@ -511,9 +514,9 @@ public class DatasourceJoiner
    *
    * @return Datasets from local override storage by type {@link QueryResults}.
    */
-  public QueryResults getLOS()
+  public LocalOverrideStorage getLOS()
   {
-    return new QueryResultsList(myLOS.iterator(), myLOS.size());
+    return myLOS;
   }
 
   public static final Comparator<DJDataset> sortPAL = (ds1, ds2) -> {

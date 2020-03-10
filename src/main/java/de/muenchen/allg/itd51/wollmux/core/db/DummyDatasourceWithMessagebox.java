@@ -32,9 +32,11 @@
  */
 package de.muenchen.allg.itd51.wollmux.core.db;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Vector;
+
+import de.muenchen.allg.itd51.wollmux.core.db.OOoDatasource.OOoDataset;
 
 /**
  * Eine Dummy-Datenquelle, die im Schema keine Datensätze enthält und als QueryResult
@@ -44,10 +46,9 @@ import java.util.Vector;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class DummyDatasourceWithMessagebox implements Datasource
+public class DummyDatasourceWithMessagebox implements Datasource<OOoDataset>
 {
-  private static QueryResults emptyResults = new QueryResultsList(
-    new Vector<Dataset>(0));
+  private static List<OOoDataset> emptyResults = new ArrayList<>();
 
   private List<String> schema;
 
@@ -59,32 +60,26 @@ public class DummyDatasourceWithMessagebox implements Datasource
     this.name = name;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.muenchen.allg.itd51.wollmux.db.Datasource#getSchema()
-   */
   @Override
   public List<String> getSchema()
   {
-    return schema;
+    return null;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * de.muenchen.allg.itd51.wollmux.db.Datasource#getDatasetsByKey(java.util.Collection
-   * , long)
-   */
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<OOoDataset> getDatasetsByKey(Collection<String> keys)
   {
     return emptyResults;
   }
 
   @Override
-  public QueryResults getContents()
+  public List<OOoDataset> find(List<QueryPart> query)
+  {
+    return emptyResults;
+  }
+
+  @Override
+  public List<OOoDataset> getContents()
   {
     return emptyResults;
   }
@@ -92,12 +87,7 @@ public class DummyDatasourceWithMessagebox implements Datasource
   @Override
   public String getName()
   {
-    return name;
+    return "";
   }
 
-  @Override
-  public QueryResults find(List<QueryPart> query)
-  {
-    return emptyResults;
-  }
 }

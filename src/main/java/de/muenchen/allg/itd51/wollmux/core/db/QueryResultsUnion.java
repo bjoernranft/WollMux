@@ -31,51 +31,25 @@
 package de.muenchen.allg.itd51.wollmux.core.db;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Stellt die Vereinigung 2er QueryResults als QueryResults zur Verfügung.
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class QueryResultsUnion implements QueryResults
+public class QueryResultsUnion
 {
-  private QueryResults results1;
-  private QueryResults results2;
+  private List<Dataset> results1;
+  private List<Dataset> results2;
   
   /**
    * Erzeugt eine neue Vereinigung, die die Resultate von res1 und die
    * Resultate von res2 enthält in undefinierter Reihenfolge. 
    */
-  public QueryResultsUnion(QueryResults res1, QueryResults res2)
+  public QueryResultsUnion(List<Dataset> res1, List<Dataset> res2)
   {
     results1 = res1;
     results2 = res2;
-  }
-
-  /* (non-Javadoc)
-   * @see de.muenchen.allg.itd51.wollmux.db.QueryResults#size()
-   */
-  @Override
-  public int size()
-  {
-    return results1.size() + results2.size();
-  }
-
-  /* (non-Javadoc)
-   * @see de.muenchen.allg.itd51.wollmux.db.QueryResults#iterator()
-   */
-  @Override
-  public Iterator<Dataset> iterator()
-  {
-    return new UnionIterator(results1.iterator(), results2.iterator());
-  }
-
-  /* (non-Javadoc)
-   * @see de.muenchen.allg.itd51.wollmux.db.QueryResults#isEmpty()
-   */
-  @Override
-  public boolean isEmpty()
-  {
-    return results1.isEmpty() && results2.isEmpty();
   }
 
   private static class UnionIterator implements Iterator<Dataset>

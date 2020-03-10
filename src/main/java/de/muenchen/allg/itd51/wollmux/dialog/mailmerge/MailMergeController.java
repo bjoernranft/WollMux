@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.mail.MessagingException;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.text.XTextDocument;
 
 import de.muenchen.allg.itd51.wollmux.XPrintModel;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResultsWithSchema;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.document.TextDocumentModel;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -123,10 +124,12 @@ public class MailMergeController
       Map<SubmitArgument, Object> args)
   {
     documentController.collectNonWollMuxFormFields();
-    QueryResultsWithSchema data = ds.getData();
 
+    // QueryResultsWithSchema data = ds.getData();
+    Pair<List<String>, List<Dataset>> data = ds.getData();
     List<String> usePrintFunctions = new ArrayList<>();
     boolean ignoreDocPrintFuncs = true;
+
     switch (action)
     {
     case SINGLE_DOCUMENT:
@@ -172,10 +175,12 @@ public class MailMergeController
     }
 
     List<Integer> selected = new ArrayList<>();
+    int size = data.getRight().size();
+
     switch (datasetSelectionType)
     {
       case ALL:
-        for (int i = 0; i < data.size(); ++i)
+      for (int i = 0; i < size; ++i)
           selected.add(i);
         break;
       case INDIVIDUAL:
@@ -185,34 +190,48 @@ public class MailMergeController
         break;
       case RANGE:
         indexSelection = (IndexSelection) args.get(SubmitArgument.INDEX_SELECTION);
-        if (indexSelection.rangeStart < 1) {
+
+      if (indexSelection.rangeStart < 1)
+      {
           indexSelection.rangeStart = 1;
         }
-        if (indexSelection.rangeEnd < 1) {
-          indexSelection.rangeEnd = data.size();
-        }
-        if (indexSelection.rangeEnd > data.size())
-          indexSelection.rangeEnd = data.size();
-        if (indexSelection.rangeStart > data.size())
-          indexSelection.rangeStart = data.size();
-        if (indexSelection.rangeStart > indexSelection.rangeEnd)
-        {
-          int t = indexSelection.rangeStart;
-          indexSelection.rangeStart = indexSelection.rangeEnd;
-          indexSelection.rangeEnd = t;
-        }
-        for (int i = indexSelection.rangeStart; i <= indexSelection.rangeEnd; ++i)
-          selected.add(i - 1); // wir zählen ab 0, anders als rangeStart/End
-        break;
-      case NOTHING:
-        break;
+      if (indexSelection.rangeEnd < 1)
+      {
+        indexSelection.rangeEnd = size;
+      }
+
+      if (indexSelection.rangeEnd > size)
+      {
+        indexSelection.rangeEnd = size;
+      }
+
+      if (indexSelection.rangeStart > size)
+      {
+        indexSelection.rangeStart = size;
+      }
+
+      if (indexSelection.rangeStart > indexSelection.rangeEnd)
+      {
+        int t = indexSelection.rangeStart;
+        indexSelection.rangeStart = indexSelection.rangeEnd;
+        indexSelection.rangeEnd = t;
+      }
+
+      for (int i = indexSelection.rangeStart; i <= indexSelection.rangeEnd; ++i)
+      {
+        selected.add(i - 1);
+      }
+
+      break;
+    case NOTHING:
+      break;
     }
 
     // PrintModel erzeugen und Parameter setzen:
     final XPrintModel pmod = PrintModels.createPrintModel(documentController, !ignoreDocPrintFuncs);
     try
     {
-      pmod.setPropertyValue(SetFormValue.PROP_SCHEMA, data.getSchema());
+      pmod.setPropertyValue(SetFormValue.PROP_SCHEMA, data.getLeft());
       pmod.setPropertyValue(SetFormValue.PROP_QUERYRESULTS, data);
       Collections.sort(selected);
       pmod.setPropertyValue(SetFormValue.PROP_RECORD_SELECTION, selected);

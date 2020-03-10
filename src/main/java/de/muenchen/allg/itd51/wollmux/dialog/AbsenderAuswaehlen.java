@@ -57,8 +57,8 @@ import de.muenchen.allg.afid.UNO;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
 import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
+import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorage;
 import de.muenchen.allg.itd51.wollmux.core.db.LocalOverrideStorageStandardImpl.LOSDJDataset;
-import de.muenchen.allg.itd51.wollmux.core.db.QueryResults;
 import de.muenchen.allg.itd51.wollmux.core.dialog.adapter.AbstractActionListener;
 import de.muenchen.allg.itd51.wollmux.event.handlers.OnPALChangedNotify;
 
@@ -129,7 +129,7 @@ public class AbsenderAuswaehlen
     XButton abortBtn = UNO.XButton(controlContainer.getControl("abortBtn"));
     abortBtn.addActionListener(abortActionListener);
 
-    QueryResults palEntries = dj.getLOS();
+    LocalOverrideStorage palEntries = dj.getLOS();
     if (palEntries.isEmpty())
     {
       new PersoenlicheAbsenderlisteVerwalten(dj, palListener);

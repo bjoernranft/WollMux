@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.Vector;
 
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
@@ -58,7 +57,7 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  * 
  * @author Matthias Benkmann (D-III-ITD 5.1)
  */
-public class PreferDatasource implements Datasource
+public class PreferDatasource implements Datasource<Dataset>
 {
   private Datasource source1;
 
@@ -157,20 +156,20 @@ public class PreferDatasource implements Datasource
   }
 
   @Override
-  public QueryResults getDatasetsByKey(Collection<String> keys)
+  public List<Dataset> getDatasetsByKey(Collection<String> keys)
   {
     return new QueryResultsOverride(source2.getDatasetsByKey(keys), source1.getDatasetsByKey(keys),
         source1);
   }
 
   @Override
-  public QueryResults getContents()
+  public List<Dataset> getContents()
   {
-    return new QueryResultsList(new Vector<Dataset>(0));
+    return new ArrayList<>();
   }
 
   @Override
-  public QueryResults find(List<QueryPart> query)
+  public List<Dataset> find(List<QueryPart> query)
   {
     return new QueryResultsOverride(source2.find(query), source1.find(query), source1);
   }
@@ -181,17 +180,17 @@ public class PreferDatasource implements Datasource
     return name;
   }
 
-  private static class QueryResultsOverride implements QueryResults
+  private static class QueryResultsOverride
   {
     private int size;
 
     private Set<String> keyBlacklist = new HashSet<>();
 
-    private QueryResults overrideResults;
+    private List<Dataset> overrideResults;
 
-    private QueryResults results;
+    private List<Dataset> results;
 
-    public QueryResultsOverride(QueryResults results, QueryResults overrideResults,
+    public QueryResultsOverride(List<Dataset> results, List<Dataset> overrideResults,
         Datasource override)
     {
       this.overrideResults = overrideResults;
@@ -218,7 +217,7 @@ public class PreferDatasource implements Datasource
        * Suchbedingung nicht mehr passt) müssen auch mit ihrem Schlüssel auf die
        * Blacklist. Deswegen müssen wir diese Datensätze suchen.
        */
-      QueryResults blacklistResults =
+      List<Dataset> blacklistResults =
           override.getDatasetsByKey(keyToCount.keySet());
 
       size += overrideResults.size();
@@ -243,24 +242,6 @@ public class PreferDatasource implements Datasource
           }
         }
       }
-    }
-
-    @Override
-    public int size()
-    {
-      return size;
-    }
-
-    @Override
-    public Iterator<Dataset> iterator()
-    {
-      return new MyIterator();
-    }
-
-    @Override
-    public boolean isEmpty()
-    {
-      return size == 0;
     }
 
     private class MyIterator implements Iterator<Dataset>
