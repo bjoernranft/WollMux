@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner.DJDatasetWrapper;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
 
 /**
@@ -59,6 +60,7 @@ public class Search
    * Ergebnisse in einem {@link QueryResults}-Objekt zurück. Falls einer der übergebenen Parameter
    * <code>null</code> ist oder falls der queryString leer ist, wird <code>null</code>
    * zurückgeliefert.
+ * @param <T>
    * 
    * @param queryString
    *          die Suchanfrage
@@ -75,7 +77,7 @@ public class Search
    *           falls eine Datenquelle, in der gesucht werden soll, nicht existiert
    * @return Results as an Iterable of Dataset as {@link QueryResults}
    */
-  public static List<Dataset> search(String queryString, SearchStrategy searchStrategy,
+  public static <T> List<T> search(String queryString, SearchStrategy searchStrategy,
       DatasourceJoiner dj, boolean useDjMainDatasource)
   {
     if (queryString == null || searchStrategy == null || dj == null)
@@ -85,8 +87,9 @@ public class Search
 
     List<Query> queries = parseQuery(searchStrategy, queryString);
 
-    List<Dataset> results = null;
-    List<List<Dataset>> listOfQueryResultsList = new ArrayList<>();
+    List<T> results = null;
+    List<List<T>> listOfQueryResultsList = new ArrayList<>();
+    List<List<T>> wrapperList = new ArrayList<>();
 
     for (Query query : queries)
     {
@@ -98,10 +101,11 @@ public class Search
       {
         results = (useDjMainDatasource ? dj.find(query.getQueryParts()) : dj.find(query));
       }
+      
       listOfQueryResultsList.add(results);
     }
 
-    return mergeListOfQueryResultsList(listOfQueryResultsList);
+    return mergeListOfQueryResultsList(wrapperList);
   }
 
   /**
@@ -116,7 +120,7 @@ public class Search
    *          die virtuelle Datenbank (siehe {@link DatasourceJoiner}), in der gesucht werden soll
    * @return Results as an Iterable of Dataset as {@link QueryResults}
    */
-  public static List<Dataset> search(Map<String, String> query, DatasourceJoiner dj)
+  public static List<DJDatasetWrapper> search(Map<String, String> query, DatasourceJoiner dj)
   {
     List<QueryPart> parts = new ArrayList<>();
 
@@ -173,15 +177,16 @@ public class Search
 
   /**
    * Führt die Ergenismengen zusammen. Dabei werden mehrfache Ergebnisse ausgefiltert.
+ * @param <T>
    * 
    * @return bereinigte Ergebnisliste.
    */
-  private static List<Dataset> mergeListOfQueryResultsList(
-      List<List<Dataset>> listOfQueryResultsList)
+  private static <T> List<T> mergeListOfQueryResultsList(
+      List<List<T>> listOfQueryResultsList)
   {
-    List<Dataset> mergedLists = new ArrayList<>();
+    List<T> mergedLists = new ArrayList<>();
 
-    for (List<Dataset> queryResults : listOfQueryResultsList)
+    for (List<T> queryResults : listOfQueryResultsList)
     {
       mergedLists.addAll(queryResults);
     }

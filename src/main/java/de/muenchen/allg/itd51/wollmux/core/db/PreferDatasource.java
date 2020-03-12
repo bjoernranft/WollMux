@@ -59,9 +59,9 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
  */
 public class PreferDatasource implements Datasource<Dataset>
 {
-  private Datasource source1;
+  private Datasource<Dataset> source1;
 
-  private Datasource source2;
+  private Datasource<Dataset> source2;
 
   private String source1Name;
 
@@ -84,7 +84,7 @@ public class PreferDatasource implements Datasource<Dataset>
    *          der Kontext relativ zu dem URLs aufgelöst werden sollen (zur Zeit nicht
    *          verwendet).
    */
-  public PreferDatasource(Map<String, Datasource> nameToDatasource,
+  public PreferDatasource(Map<String, Datasource<Dataset>> nameToDatasource,
       ConfigThingy sourceDesc, URL context)
   {
     name = parseConfig(sourceDesc, "NAME", () -> L.m("NAME der Datenquelle fehlt"));
@@ -191,7 +191,7 @@ public class PreferDatasource implements Datasource<Dataset>
     private List<Dataset> results;
 
     public QueryResultsOverride(List<Dataset> results, List<Dataset> overrideResults,
-        Datasource override)
+        Datasource<Dataset> override)
     {
       this.overrideResults = overrideResults;
       this.results = results;

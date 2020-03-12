@@ -162,10 +162,7 @@ public class ColumnTransformer
   {
     //return new TranslatedQueryResults(qres);
     
-    for (Dataset ds : qres)
-    {
-      this.get(columnName, ds)
-    }
+   
   }
 
   /**

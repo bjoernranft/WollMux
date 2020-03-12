@@ -43,7 +43,7 @@ public class DatasourceJoinerFactory
   /**
    * Enthält den zentralen DataSourceJoiner.
    */
-  private static DatasourceJoiner datasourceJoiner;
+  private static DatasourceJoiner<Dataset> datasourceJoiner;
 
   private static long datasourceTimeout = 10000;
 
@@ -56,7 +56,7 @@ public class DatasourceJoinerFactory
    * Initialisiert den DJ wenn nötig und liefert ihn dann zurück (oder null, falls ein Fehler
    * während der Initialisierung aufgetreten ist).
    */
-  public static DatasourceJoiner getDatasourceJoiner()
+  public static DatasourceJoiner<Dataset> getDatasourceJoiner()
   {
     if (datasourceJoiner == null)
     {

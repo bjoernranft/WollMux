@@ -92,7 +92,7 @@ public interface Datasource<T>
    *          Query to search against the main datasource.
    * @return Results as {@link QueryResults}
    */
-  public List<T> find(List<QueryPart> query);
+  public List<Dataset> find(List<QueryPart> query);
 
   /**
    * Liefert eine implementierungsabhängige Teilmenge der Datensätze der Datenquelle. Wenn möglich

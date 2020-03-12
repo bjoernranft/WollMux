@@ -70,6 +70,7 @@ import de.muenchen.allg.itd51.wollmux.XWollMux;
 import de.muenchen.allg.itd51.wollmux.XWollMuxDocument;
 import de.muenchen.allg.itd51.wollmux.core.db.ColumnNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DJDataset;
+import de.muenchen.allg.itd51.wollmux.core.db.Dataset;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasetNotFoundException;
 import de.muenchen.allg.itd51.wollmux.core.db.DatasourceJoiner;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
@@ -414,7 +415,7 @@ public class WollMux extends WeakBase implements XServiceInfo, XDispatchProvider
   {
     // Diese Methode nimmt keine Synchronisierung über den WollMuxEventHandler vor,
     // da das reine Auslesen der Datenstrukturen unkritisch ist.
-    DatasourceJoiner dj = DatasourceJoinerFactory.getDatasourceJoiner();
+    DatasourceJoiner<Dataset> dj = DatasourceJoinerFactory.getDatasourceJoiner();
     UnoProps p = new UnoProps();
     try
     {

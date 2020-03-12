@@ -45,11 +45,11 @@ public interface Dataset
    *           Datenbankschemas ist und nichts damit zu tun hat, ob der Wert des Datensatzes in der
    *           entsprechenden Spalte gesetzt ist.
    */
-  public String get(String columnName) throws ColumnNotFoundException;
+  public abstract String get(String columnName) throws ColumnNotFoundException;
 
   /**
    * Liefert den Schlüsselwert dieses Datensatzes. Dieser sollte den Datensatz in seiner Datenbank
    * eindeutig identifizieren muss es aber nicht.
    */
-  public String getKey();
+  public abstract String getKey();
 }

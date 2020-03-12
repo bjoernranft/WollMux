@@ -76,8 +76,9 @@ import de.muenchen.allg.itd51.wollmux.core.util.L;
 /**
  * Stellt eine virtuelle Datenbank zur Verfügung, die ihre Daten aus verschiedenen
  * Hintergrunddatenbanken zieht.
+ * @param <T>
  */
-public class DatasourceJoiner
+public class DatasourceJoiner<T>
 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DatasourceJoiner.class);
@@ -104,7 +105,7 @@ public class DatasourceJoiner
    * Bildet Datenquellenname auf Datasource-Objekt ab. Nur die jeweils zuletzt unter einem Namen in
    * der Config-Datei aufgeführte Datebank ist hier verzeichnet.
    */
-  private Map<String, Datasource> nameToDatasource = new HashMap<>();
+  private Map<String, Datasource<Dataset>> nameToDatasource = new HashMap<>();
 
   private LocalOverrideStorage myLOS;
 
@@ -116,7 +117,7 @@ public class DatasourceJoiner
   /**
    * Die Datenquelle auf die sich find(), getLOS(), etc beziehen.
    */
-  protected Datasource mainDatasource;
+  protected Datasource<T> mainDatasource;
 
   /**
    * Eine Liste, die die {@link Dataset}s enthält, die mit einer Hintergrunddatenbank verknüpft
@@ -366,7 +367,7 @@ public class DatasourceJoiner
    */
   public List<Dataset> getContentsOf(String datasourceName)
   {
-    Datasource source = nameToDatasource.get(datasourceName);
+    Datasource<Dataset> source = nameToDatasource.get(datasourceName);
     if (source == null)
       throw new IllegalArgumentException(
           L.m("Datenquelle {} soll abgefragt werden, ist aber nicht definiert", datasourceName));
@@ -379,16 +380,17 @@ public class DatasourceJoiner
    * möglich sollte die Datenquelle hier all ihre Datensätze zurückliefern oder zumindest soviele
    * wie möglich. Es ist jedoch auch erlaubt, dass hier gar keine Datensätze zurückgeliefert werden.
    * Die Ergebnisse sind DJDatasets!
+ * @param <T>
    *
    * @return Datensätze aus der Datenquelle.
    */
-  public List<Dataset> getContentsOfMainDatasource()
+  public List<T> getContentsOfMainDatasource()
   {
-    List<Dataset> res = mainDatasource.getContents();
-    List<DJDatasetWrapper> djDatasetsList = StreamSupport.stream(res.spliterator(), false)
+    List<T> res = mainDatasource.getContents();
+    List<T> djDatasetsList = StreamSupport.stream(res.spliterator(), false)
         .map(ds -> new DJDatasetWrapper(ds)).collect(Collectors.toList());
 
-    return new ArrayList<>(djDatasetsList);
+    return djDatasetsList;
   }
 
   /**
@@ -546,7 +548,7 @@ public class DatasourceJoiner
    * zurückgeliefert werden. Der Wrapper ist notwendig, um die auch für Fremddatensätze sinnvollen
    * DJDataset Funktionen anbieten zu können, allen voran copy().
    */
-  private class DJDatasetWrapper implements DJDataset
+  public class DJDatasetWrapper implements DJDataset
   {
     private Dataset myDS;
 
