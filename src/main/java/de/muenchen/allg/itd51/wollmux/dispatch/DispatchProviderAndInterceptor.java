@@ -149,6 +149,7 @@ public class DispatchProviderAndInterceptor implements XDispatchProvider,
     {
       if (dispatcher.supports(url))
       {
+        LOGGER.debug("", url);
         return dispatcher.create(getOrigDispatch(url, frameName, fsFlag), url, frame);
       }
     }

@@ -1,6 +1,6 @@
 package de.muenchen.allg.itd51.wollmux.event.handlers;
 
-import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
+import com.sun.star.text.XTextDocument;
 
 /**
  * Observer notifies sidebar instances when an instance of TextDocumentController is available.
@@ -13,7 +13,7 @@ import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
  */
 public class OnTextDocumentControllerInitialized extends WollMuxEvent
 {
-  private final TextDocumentController documentController;
+  private final XTextDocument documentController;
 
   /**
    * Handled if TextDocumentController is initialized.
@@ -21,12 +21,12 @@ public class OnTextDocumentControllerInitialized extends WollMuxEvent
    * @param documentController
    *          Instance of TextDocumentController.
    */
-  public OnTextDocumentControllerInitialized(TextDocumentController documentController)
+  public OnTextDocumentControllerInitialized(XTextDocument documentController)
   {
     this.documentController = documentController;
   }
 
-  public TextDocumentController getTextDocumentController()
+  public XTextDocument getTextDocumentController()
   {
     return this.documentController;
   }

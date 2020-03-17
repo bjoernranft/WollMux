@@ -4,17 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.document.XEventListener;
 import com.sun.star.frame.XFrame;
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.text.XTextDocument;
-import com.sun.star.uno.AnyConverter;
 
 import de.muenchen.allg.afid.UNO;
-import de.muenchen.allg.afid.UnoProps;
 import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.dispatch.DispatchProviderAndInterceptor;
 import de.muenchen.allg.itd51.wollmux.document.DocumentManager;
@@ -80,7 +77,7 @@ public class LibreOfficeEventListener implements XEventListener
       switch (event)
       {
       case ON_CREATE:
-        onCreate(docEvent.Source);
+        // onCreate(docEvent.Source);
         break;
       case ON_VIEW_CREATED:
         onViewCreated(docEvent.Source);
@@ -153,19 +150,16 @@ public class LibreOfficeEventListener implements XEventListener
   private void onViewCreated(Object source)
   {
     XModel compo = UNO.XModel(source);
+
     if (compo == null)
       return;
 
     // no action for temporary files
     if (isTempMailMergeDocument(compo))
     {
+      LOGGER.debug(
+          "Document is an mail merge document. Further processing is not required. Returning.");
       return;
-    }
-
-    XTextDocument xTextDoc = UNO.XTextDocument(compo);
-    if (xTextDoc != null)
-    {
-      registerDispatcher(compo.getCurrentController().getFrame());
     }
 
     // Check installation is only executed on first event because the listener is unregistered
@@ -173,12 +167,14 @@ public class LibreOfficeEventListener implements XEventListener
     new OnCheckInstallation().emit();
     new OnInitialize().emit();
 
+    XTextDocument xTextDoc = UNO.XTextDocument(compo);
     Info docInfo = docManager.getInfo(compo);
-    if (xTextDoc != null && docInfo != null && isDocumentLoadedHidden(compo))
-    {
-      docManager.remove(compo);
-      return;
-    }
+
+    if (xTextDoc != null)
+      registerDispatcher(compo.getCurrentController().getFrame()); // wird für jedes neue
+                                                                   // xtextdocument registriert?
+    // kann es was damit zu tun haben das bei PersonelicheAbsenderListeVerwalten der keylistener auf
+    // ein Control nicht funktioniert.
 
     // start processing
     if (docInfo == null)
@@ -186,8 +182,7 @@ public class LibreOfficeEventListener implements XEventListener
       if (xTextDoc != null)
       {
         docManager.addTextDocument(xTextDoc);
-        new OnProcessTextDocument(DocumentManager.getTextDocumentController(xTextDoc),
-            !isDocumentLoadedHidden(compo)).emit();
+        new OnProcessTextDocument(DocumentManager.getTextDocumentController(xTextDoc)).emit();
       } else
       {
         docManager.add(compo);
@@ -198,7 +193,7 @@ public class LibreOfficeEventListener implements XEventListener
 
     if (xTextDoc != null)
     {
-      new OnTextDocumentControllerInitialized(DocumentManager.getTextDocumentController(xTextDoc))
+      new OnTextDocumentControllerInitialized(xTextDoc)
           .emit();
     }
   }
@@ -283,31 +278,6 @@ public class LibreOfficeEventListener implements XEventListener
 
     return tmp || mmService || wmMailmerge
         || (fileName.equals("private:object") && hidden);
-  }
-
-  /**
-   * Check whether a document is loaded invisible.
-   *
-   * @param compo
-   *          A document.
-   * @return True if it's hidden, false otherwise.
-   */
-  private boolean isDocumentLoadedHidden(XModel compo)
-  {
-    UnoProps props = new UnoProps(compo.getArgs());
-    try
-    {
-      return AnyConverter.toBoolean(props.getPropertyValue("Hidden"));
-    }
-    catch (UnknownPropertyException e)
-    {
-      return false;
-    }
-    catch (IllegalArgumentException e)
-    {
-      LOGGER.error(L.m("das darf nicht vorkommen!"), e);
-      return false;
-    }
   }
 
   @Override

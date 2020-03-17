@@ -165,20 +165,15 @@ public class DocumentCommandInterpreter
     LOGGER.debug("scanInsertFormValueCommands");
     boolean modified = getDocumentController().getModel().isDocumentModified();
 
-    try
-    {
-      getDocumentController().getModel().setDocumentModifiable(false);
-      InsertFormValueCommandsScanner s = new InsertFormValueCommandsScanner(this);
-      s.execute(getDocumentController().getModel().getDocumentCommands());
+    getDocumentController().getModel().setDocumentModifiable(false);
+    InsertFormValueCommandsScanner s = new InsertFormValueCommandsScanner(this);
+    s.execute(getDocumentController().getModel().getDocumentCommands());
 
-      getDocumentController().getModel().setIDToFormFields(s.idToFormFields);
-      getDocumentController().collectNonWollMuxFormFields();
-    }
-    finally
-    {
-      getDocumentController().getModel().setDocumentModified(modified);
-      getDocumentController().getModel().setDocumentModifiable(true);
-    }
+    getDocumentController().getModel().setIDToFormFields(s.idToFormFields);
+    getDocumentController().collectNonWollMuxFormFields();
+
+    getDocumentController().getModel().setDocumentModified(modified);
+    getDocumentController().getModel().setDocumentModifiable(true);
   }
 
   /**

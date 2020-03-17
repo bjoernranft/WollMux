@@ -138,9 +138,12 @@ public class SeriendruckSidebarContent extends ComponentBase
     windowPeer = GuiFactory.createWindow(toolkit, parentWindowPeer);
     windowPeer.setBackground(0xffffffff);
     window = UnoRuntime.queryInterface(XWindow.class, windowPeer);
-    WollMuxEventHandler.getInstance().registerListener(this);
+
     init();
+    WollMuxEventHandler.getInstance().registerListener(this);
   }
+
+  private XTextDocument currentDoc;
 
   /**
    * Sets TextDocumentController once it is available.
@@ -152,15 +155,14 @@ public class SeriendruckSidebarContent extends ComponentBase
   @Subscribe
   public void onTextDocumentControllerInitialized(OnTextDocumentControllerInitialized event)
   {
-    TextDocumentController controller = event.getTextDocumentController();
+    currentDoc = event.getTextDocumentController();
+    textDocumentController = DocumentManager.getTextDocumentController(currentDoc);
 
-    if (controller == null)
+    if (textDocumentController == null)
     {
       LOGGER.error("{} notify(): documentController is NULL.", this.getClass().getSimpleName());
       return;
     }
-
-    textDocumentController = controller;
 
     init();
   }
@@ -170,25 +172,32 @@ public class SeriendruckSidebarContent extends ComponentBase
    */
   public void init()
   {
+    // nur beim ersten start von LO wird sidebar nicht vor onViewCreated instanziert!
+
     // An instance of DocumentManager.getTextDocumentController() may exist if another sidebar deck
     // was active when LO was started, see {@link OnTextDocumentControllerInitialized}.
     // If this deck was the active one at startup, this method should be notified by subscribed
     // {@link OnTextDocumentControllerInitialized} in the Constructor of this class which sets
     // textDocumentController instance once it exists.
-    if (textDocumentController == null)
+    if (textDocumentController == null && currentDoc == null)
     {
       // We can't use this everytime. If this sidebar is the active one at startup,
       // UNO.getCurrentTextDocument() throws NULL due UNO.desktop.getCurrentComponent()
       // is not initialized. If NULL, we return and wait for an notification by
       // {@link OnTextDocumentControllerInitialized}.
-      XTextDocument currentDoc = UNO.getCurrentTextDocument();
 
+      // Seems getComponent() not set correctly, does it may have something to do that Sidebar is
+      // initialized between
+      // OnCreate() and OnViewCreated() and getComponent() has the right value at OnViewCreated?
+      // May LO sets setComponent() too late (?) in OnViewCreated.
+
+      currentDoc = UNO.getCurrentTextDocument();
       if (currentDoc == null)
       {
         LOGGER.error("{} init(): Current Text Document is NULL.", this.getClass().getName());
         return;
       }
-
+      //
       textDocumentController = DocumentManager.getTextDocumentController(currentDoc);
     }
 
@@ -202,8 +211,8 @@ public class SeriendruckSidebarContent extends ComponentBase
 
       textDocumentController.setFormFieldsPreviewMode(false);
       datasource = new MailMergeDatasource(textDocumentController);
-      WollMuxEventHandler.getInstance().unregisterListener(this);
       window.setVisible(true);
+      WollMuxEventHandler.getInstance().unregisterListener(this);
     } else
     {
       LOGGER.error("SeriendruckSidebar: setMailMergeOnDocument(): textDocumentController is NULL.");

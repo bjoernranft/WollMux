@@ -9,8 +9,8 @@ import de.muenchen.allg.itd51.wollmux.WollMuxFiles;
 import de.muenchen.allg.itd51.wollmux.core.document.WMCommandsFailedException;
 import de.muenchen.allg.itd51.wollmux.core.form.model.FormModelException;
 import de.muenchen.allg.itd51.wollmux.core.parser.ConfigThingy;
+import de.muenchen.allg.itd51.wollmux.core.parser.ConfigurationErrorException;
 import de.muenchen.allg.itd51.wollmux.core.parser.NodeNotFoundException;
-import de.muenchen.allg.itd51.wollmux.core.util.L;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.document.commands.DocumentCommandInterpreter;
 import de.muenchen.allg.itd51.wollmux.event.WollMuxEventHandler;
@@ -25,8 +25,6 @@ public class OnProcessTextDocument extends WollMuxEvent
 
   private TextDocumentController documentController;
 
-  private boolean visible;
-
   /**
    * Create this event.
    *
@@ -35,11 +33,9 @@ public class OnProcessTextDocument extends WollMuxEvent
    * @param visible
    *          If false, the window of the document is invisible, otherwise it's visible.
    */
-  public OnProcessTextDocument(TextDocumentController documentController,
-      boolean visible)
+  public OnProcessTextDocument(TextDocumentController documentController)
   {
     this.documentController = documentController;
-    this.visible = visible;
   }
 
   @Override
@@ -50,72 +46,65 @@ public class OnProcessTextDocument extends WollMuxEvent
       return;
     }
 
-    if (visible)
+    try
+    {
+      ConfigThingy tds = WollMuxFiles.getWollmuxConf().query("Fenster").query("Textdokument")
+          .getLastChild();
+      documentController.getFrameController().setWindowViewSettings(tds);
+    } catch (NodeNotFoundException e)
+    {
+      // configuration for Fenster isn't mandatory
+    }
+
+    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(documentController,
+        WollMuxFiles.isDebugMode());
+
+    // scan global document commands
+    dci.scanGlobalDocumentCommands();
+
+    int actions = documentController.evaluateDocumentActions(
+        GlobalFunctions.getInstance().getDocumentActionFunctions().iterator());
+
+    // if it is a template execute the commands
+    if ((actions < 0 && documentController.getModel().isTemplate())
+        || (actions == Integer.MAX_VALUE))
     {
       try
       {
-        ConfigThingy tds = WollMuxFiles.getWollmuxConf().query("Fenster")
-            .query("Textdokument").getLastChild();
-        documentController.getFrameController().setWindowViewSettings(tds);
-      } catch (NodeNotFoundException e)
+        dci.executeTemplateCommands();
+      } catch (WMCommandsFailedException e)
       {
-        // configuration for Fenster isn't mandatory
+        LOGGER.error("", e);
       }
+
+      // there can be new commands now
+      dci.scanGlobalDocumentCommands();
     }
 
-    DocumentCommandInterpreter dci = new DocumentCommandInterpreter(
-        documentController, WollMuxFiles.isDebugMode());
+    dci.scanInsertFormValueCommands();
 
-    try
+    // if it is a form execute form commands
+    if (actions != 0 && documentController.getModel().isFormDocument())
     {
-      // scan global document commands
-      dci.scanGlobalDocumentCommands();
-
-      int actions = documentController.evaluateDocumentActions(GlobalFunctions
-          .getInstance().getDocumentActionFunctions().iterator());
-
-      // if it is a template execute the commands
-      if ((actions < 0 && documentController.getModel().isTemplate())
-          || (actions == Integer.MAX_VALUE))
+      try
       {
-        dci.executeTemplateCommands();
-
-        // there can be new commands now
-        dci.scanGlobalDocumentCommands();
-      }
-      dci.scanInsertFormValueCommands();
-
-      // if it is a form execute form commands
-      if (actions != 0 && documentController.getModel().isFormDocument())
+        documentController.getFrameController().setDocumentZoom(WollMuxFiles.getWollmuxConf()
+            .query("Fenster").query("Formular").getLastChild().query("ZOOM"));
+      } catch (ConfigurationErrorException | NodeNotFoundException e)
       {
-        // Konfigurationsabschnitt Fenster/Formular verarbeiten falls Dok sichtbar
-        if (visible)
-        {
-          try
-          {
-            documentController.getFrameController().setDocumentZoom(
-                WollMuxFiles.getWollmuxConf().query("Fenster").query(
-                    "Formular").getLastChild().query("ZOOM"));
-          } catch (java.lang.Exception e)
-          {
-            // configuration for Fenster isn't mandatory
-          }
-        }
-
-        try
-        {
-          FormController formController = documentController.getFormController();
-          formController.createFormGUI();
-          formController.formControllerInitCompleted();
-        } catch (FormModelException e)
-        {
-          throw new WMCommandsFailedException(
-              L.m("Die Vorlage bzw. das Formular enthält keine gültige Formularbeschreibung\n\nBitte kontaktieren Sie Ihre Systemadministration."));
-        }
+        // configuration for Fenster isn't mandatory
+        LOGGER.trace("", e);
       }
-    } catch (java.lang.Exception e)
-    {
-      throw new WollMuxFehlerException(L.m("Fehler bei der Dokumentbearbeitung."), e);
+
+      try
+      {
+        FormController formController = documentController.getFormController();
+        formController.createFormGUI();
+        formController.formControllerInitCompleted();
+      } catch (FormModelException e)
+      {
+        LOGGER.error("No valid formular UI configuration found.", e);
+      }
     }
 
     // notify listeners about processing finished
