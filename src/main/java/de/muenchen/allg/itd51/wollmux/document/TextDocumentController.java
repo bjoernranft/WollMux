@@ -1080,7 +1080,7 @@ public class TextDocumentController implements FormValueChangedListener, Visibil
    * @param visible
    *          If true shows the elements, otherwise hides the elements.
    */
-  public void setVisibleState(String groupId, boolean visible)
+  public synchronized void setVisibleState(String groupId, boolean visible)
   {
     try
     {

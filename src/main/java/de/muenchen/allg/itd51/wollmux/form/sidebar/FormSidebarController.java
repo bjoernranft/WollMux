@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -216,9 +215,9 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   {
     try
     {
-      XControl txtField = UNO.XControl(event.Source);
-      String id = (String) UnoProperty.getProperty(txtField.getModel(), UnoProperty.DEFAULT_CONTROL);
-      short state = (short) UnoProperty.getProperty(txtField.getModel(), UnoProperty.STATE);
+      XControl checkBox = UNO.XControl(event.Source);
+      String id = (String) UnoProperty.getProperty(checkBox.getModel(), UnoProperty.DEFAULT_CONTROL);
+      short state = (short) UnoProperty.getProperty(checkBox.getModel(), UnoProperty.STATE);
       String stateToString = state == 0 ? "false" : "true";
       setValue(id, stateToString);
     } catch (UnoHelperException e)
@@ -238,9 +237,9 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   {
     try
     {
-      XControl txtField = UNO.XControl(event.Source);
-      String id = (String) UnoProperty.getProperty(txtField.getModel(), UnoProperty.DEFAULT_CONTROL);
-      String text = UNO.XListBox(txtField).getSelectedItem();
+      XControl listBox = UNO.XControl(event.Source);
+      String id = (String) UnoProperty.getProperty(listBox.getModel(), UnoProperty.DEFAULT_CONTROL);
+      String text = UNO.XListBox(listBox).getSelectedItem();
       setValue(id, text);
     } catch (UnoHelperException e)
     {
@@ -259,9 +258,9 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   {
     try
     {
-      XControl txtField = UNO.XControl(event.Source);
-      String id = (String) UnoProperty.getProperty(txtField.getModel(), UnoProperty.DEFAULT_CONTROL);
-      String text = (String) UnoProperty.getProperty(txtField.getModel(), UnoProperty.TEXT);
+      XControl comboBox = UNO.XControl(event.Source);
+      String id = (String) UnoProperty.getProperty(comboBox.getModel(), UnoProperty.DEFAULT_CONTROL);
+      String text = (String) UnoProperty.getProperty(comboBox.getModel(), UnoProperty.TEXT);
       setValue(id, text);
     } catch (UnoHelperException e)
     {
@@ -320,7 +319,6 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
    */
   public void buttonPressed(ActionEvent actionEvent)
   {
-
     if (!processUIElementEvents)
     {
       return;
@@ -402,7 +400,7 @@ public class FormSidebarController implements VisibilityChangedListener, FormVal
   }
 
   /**
-   * Sets textfield's text if value changed. Can be called by an dependency to another control.
+   * Sets control's text if value changed. Can be called by a dependency to another control.
    */
   @Override
   public void valueChanged(String id, String value)

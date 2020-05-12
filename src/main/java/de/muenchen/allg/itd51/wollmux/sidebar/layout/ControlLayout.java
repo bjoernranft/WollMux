@@ -90,11 +90,4 @@ public class ControlLayout implements Layout
     }
     return Integer.min(maxWidth, w);
   }
-
-  @Override
-  public XWindow getControl()
-  {
-    return control;
-  }
-
 }

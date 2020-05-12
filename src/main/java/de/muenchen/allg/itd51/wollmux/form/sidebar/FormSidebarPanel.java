@@ -1,16 +1,10 @@
 package de.muenchen.allg.itd51.wollmux.form.sidebar;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.parser.ParserDelegator;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -45,7 +39,6 @@ import de.muenchen.allg.itd51.wollmux.core.form.model.FormModel;
 import de.muenchen.allg.itd51.wollmux.core.form.model.Tab;
 import de.muenchen.allg.itd51.wollmux.document.TextDocumentController;
 import de.muenchen.allg.itd51.wollmux.form.control.HTMLElement;
-import de.muenchen.allg.itd51.wollmux.form.control.HTMLParserCallback;
 import de.muenchen.allg.itd51.wollmux.sidebar.GuiFactory;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.HorizontalLayout;
 import de.muenchen.allg.itd51.wollmux.sidebar.layout.Layout;
@@ -119,7 +112,6 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
   private void paint()
   {
     Rectangle rect = parentWindow.getPosSize();
-    LOGGER.debug("width {}, height {}", rect.Width, rect.Height);
     if (tabControlContainer != null)
     {
       short activeTab = tabControlContainer.getActiveTabPageID();
@@ -254,7 +246,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
 
     if (label.contains("<html>"))
     {
-      List<HTMLElement> htmlElements = parseHtml(label);
+      List<HTMLElement> htmlElements = HTMLElement.parseHtml(label);
 
       if (!htmlElements.isEmpty())
       {
@@ -266,10 +258,9 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
 
     return htmlElement;
   }
+
   /**
-   * Creates LO's UI controls by type of {@link ControlModel}. In general this method returns a
-   * ControlLayout which contains a single {@link XControl}. Type TEXTFIELD returns an
-   * {@link HorizontalLayout} due no label support for LO's editfield.
+   * Creates LO's UI controls by type of {@link ControlModel}. And puts them in a Layout.
    * 
    * @param control
    *          control model.
@@ -296,6 +287,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
           control.getValue(), new Rectangle(0, 0, 100, 20), props, formSidebarController::textChanged);
       UNO.XWindow(xControl).addFocusListener(formSidebarController.getFocusListener());
       break;
+
     case BUTTON:
       HTMLElement htmlElement = parseHtmlLabel(control.getLabel());
       props.put(UnoProperty.DEFAULT_CONTROL, control.getId());
@@ -310,6 +302,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
     case LABEL:
       xLabel = createLabel(control, page);
       break;
+
     case COMBOBOX:
       xLabel = createLabel(control, page);
       if (control.isEditable())
@@ -320,6 +313,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         xControl = createListBox(control, page);
       }
       break;
+
     case CHECKBOX:
       HTMLElement htmlElement2 = parseHtmlLabel(control.getLabel());
       props.put(UnoProperty.DEFAULT_CONTROL, control.getId());
@@ -333,6 +327,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
           formSidebarController::checkBoxChanged, new Rectangle(0, 0, 100, 20), props);
       UNO.XWindow(xControl).addFocusListener(formSidebarController.getFocusListener());
       break;
+
     case TEXTAREA:
       layout = new VerticalLayout();
       xLabel = createLabel(control, page);
@@ -345,15 +340,18 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
           formSidebarController::textChanged);
       UNO.XWindow(xControl).addFocusListener(formSidebarController.getFocusListener());
       break;
+
     case LISTBOX:
       xLabel = createLabel(control, page);
       xControl = createListBox(control, page);
       break;
+
     case SEPARATOR:
       props.put(UnoProperty.DEFAULT_CONTROL, control.getId());
       xControl = GuiFactory.createHLine(xMCF, context, page.getPeer().getToolkit(), page.getPeer(),
           new Rectangle(0, 0, 100, 5), props);
       break;
+
     default:
       return null;
     }
@@ -395,7 +393,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         props.put(UnoProperty.TEXT_COLOR, htmlElement.getRGBColor() & ~0xFF000000);
         if (htmlElement.getFontDescriptor() != null)
         {
-          props.put("FontDescriptor", htmlElement.getFontDescriptor());
+          props.put(UnoProperty.FONT_DESCRIPTOR, htmlElement.getFontDescriptor());
         }
         return GuiFactory.createLabel(xMCF, context, page.getPeer().getToolkit(),
             page.getPeer(), htmlElement.getText(), new Rectangle(0, 0, 100, 20), props);
@@ -605,51 +603,4 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       LOGGER.debug("", e);
     }
   }
-
-  /**
-   * Parses an html string with java swing's {@link HTMLEditorKit} to {@link HTMLElement}-Model.
-   *
-   * @param html
-   *          HTML string.
-   * @return List of HTML-Elements.
-   */
-  private List<HTMLElement> parseHtml(String html)
-  {
-    Reader stringReader = new StringReader(html);
-    HTMLEditorKit.Parser parser = new ParserDelegator();
-    HTMLParserCallback callback = new HTMLParserCallback();
-
-    try
-    {
-      parser.parse(stringReader, callback, true);
-    } catch (IOException e)
-    {
-      LOGGER.trace("", e);
-    } finally
-    {
-      try
-      {
-        stringReader.close();
-      } catch (IOException e)
-      {
-        LOGGER.trace("", e);
-      }
-    }
-
-    return callback.getHtmlElement();
-  }
-
-  /**
-   * Converts <br>
-   * to \r\n for LO's text field
-   *
-   * @param html
-   *          HTML string.
-   * @return cleaned html.
-   */
-  private String convertLineBreaks(String html)
-  {
-    return html.replace("<br>", "\r\n");
-  }
-
 }
