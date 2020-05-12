@@ -381,7 +381,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
       if (!htmlElement.getHref().isEmpty())
       {
         props.put(UnoProperty.DEFAULT_CONTROL, control.getId());
-        props.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()));
+        props.put(UnoProperty.TEXT_COLOR, htmlElement.getRGBColor() & ~0xFF000000);
         props.put(UnoProperty.URL, htmlElement.getHref());
         props.put(UnoProperty.MULTILINE, true);
         props.put(UnoProperty.HELP_TEXT, control.getTip());
@@ -392,7 +392,7 @@ public class FormSidebarPanel extends AbstractSidebarPanel implements XToolPanel
         props.put(UnoProperty.DEFAULT_CONTROL, control.getId());
         props.put(UnoProperty.MULTILINE, true);
         props.put(UnoProperty.HELP_TEXT, control.getTip());
-        props.put(UnoProperty.TEXT_COLOR, Math.abs(htmlElement.getRGBColor()));
+        props.put(UnoProperty.TEXT_COLOR, htmlElement.getRGBColor() & ~0xFF000000);
         if (htmlElement.getFontDescriptor() != null)
         {
           props.put("FontDescriptor", htmlElement.getFontDescriptor());
