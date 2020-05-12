@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.CSS;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
@@ -22,8 +23,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 
 /**
- * Parses HTML-Tags / css-inline-style.
- *
+ * Parses HTML-Tags / CSS in line style.
  */
 public class HTMLParserCallback extends HTMLEditorKit.ParserCallback
 {
@@ -63,7 +63,7 @@ public class HTMLParserCallback extends HTMLEditorKit.ParserCallback
         htmlElement.setRGBColor(color.getRGB());
       }
 
-      String fontSize = (String) a.getAttribute(javax.swing.text.html.CSS.Attribute.FONT_SIZE);
+      String fontSize = (String) a.getAttribute(CSS.Attribute.FONT_SIZE);
 
       if (fontSize != null && !fontSize.isEmpty())
       {

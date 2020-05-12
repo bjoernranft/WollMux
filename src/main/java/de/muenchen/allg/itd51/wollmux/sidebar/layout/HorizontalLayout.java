@@ -6,34 +6,31 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.sun.star.awt.Rectangle;
-import com.sun.star.awt.XWindow;
 
 /**
- * Ein horizontales Layout. Alle enthaltenen Layouts werden in einer Reihe angezeigt.
+ * A horizontal layout. The layouts are shown in one row.
  *
- * Die Breite wird dynamisch an Hand der Gewichtung berechnet.
- *
- * @author daniel.sikeler
+ * The width of each layout is computed based on their weight.
  */
 public class HorizontalLayout implements Layout
 {
   /**
-   * Container für die enthaltenen Layouts.
+   * Container for layouts.
    */
   private Map<Layout, Integer> layouts = new LinkedHashMap<>();
 
   /**
-   * Der Abstand oberhalb des ersten Layouts.
+   * Margin above first layout.
    */
   private int marginTop;
 
   /**
-   * Der Abstand zwischen den Layouts.
+   * margin between layouts.
    */
   private int marginBetween;
 
   /**
-   * Horizontales Layout mit keinen Abständen/Zwischenräumen.
+   * Horizontal layout without margin.
    */
   public HorizontalLayout()
   {
@@ -75,9 +72,9 @@ public class HorizontalLayout implements Layout
   }
 
   @Override
-  public void addLayout(Layout layout, int width)
+  public void addLayout(Layout layout, int weight)
   {
-    layouts.put(layout, width);
+    layouts.put(layout, weight);
   }
 
   @Override
@@ -101,13 +98,10 @@ public class HorizontalLayout implements Layout
     {
       minWidth += l.getKey().getMinimalWidth(l.getValue() * width);
     }
+    if (minWidth > 0)
+    {
+      minWidth += margin;
+    }
     return minWidth;
   }
-
-  @Override
-  public XWindow getControl()
-  {
-    throw new UnsupportedOperationException();
-  }
-
 }

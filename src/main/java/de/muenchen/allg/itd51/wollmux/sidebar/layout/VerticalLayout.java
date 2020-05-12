@@ -6,7 +6,6 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.sun.star.awt.Rectangle;
-import com.sun.star.awt.XWindow;
 
 /**
  * Ein verticales Layout. Alle enthaltenen Layouts werden untereinander angeordnet.
@@ -89,8 +88,11 @@ public class VerticalLayout implements Layout
   public int getHeightForWidth(int width)
   {
     int h = layouts.keySet().stream().mapToInt(l -> l.getHeightForWidth(width)).sum();
-    h += marginTop;
-    h += (layouts.size() - 1) * marginBetween;
+    if (h > 0)
+    {
+      h += marginTop;
+      h += (layouts.size() - 1) * marginBetween;
+    }
 
     return h;
   }
@@ -100,11 +102,4 @@ public class VerticalLayout implements Layout
   {
     return layouts.keySet().stream().mapToInt(l -> l.getMinimalWidth(maxWidth)).max().orElse(0);
   }
-
-  @Override
-  public XWindow getControl()
-  {
-    throw new UnsupportedOperationException();
-  }
-
 }

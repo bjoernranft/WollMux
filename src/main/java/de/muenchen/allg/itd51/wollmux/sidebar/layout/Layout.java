@@ -4,7 +4,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.XControl;
-import com.sun.star.awt.XWindow;
 
 /**
  * Ein LayoutManager für die Sidebar.
@@ -57,13 +56,6 @@ public interface Layout
   {
     addLayout(new ControlLayout(control), weight);
   }
-
-  /**
-   * Get {@link XWindow} control from {@link ControlLayout}
-   * 
-   * @return {@link XWindow}
-   */
-  XWindow getControl();
 
   /**
    * Die Höhe des Layouts.

@@ -67,16 +67,7 @@ public class GuiFactory
    */
   public static XWindowPeer createWindow(XToolkit toolkit, XWindowPeer parentWindow)
   {
-    WindowDescriptor aWindow = new WindowDescriptor();
-    aWindow.Type = WindowClass.CONTAINER;
-    aWindow.WindowServiceName = "";
-    aWindow.Parent = parentWindow;
-    aWindow.ParentIndex = -1;
-    aWindow.Bounds = new Rectangle(0, 0, 10, 10);
-    aWindow.WindowAttributes =
-      WindowAttribute.SIZEABLE | WindowAttribute.MOVEABLE
-        | WindowAttribute.NODECORATION;
-    return toolkit.createWindow(aWindow);
+    return createWindow(toolkit, parentWindow, new Rectangle(0, 0, 10, 10));
   }
 
   /**
@@ -438,7 +429,6 @@ public class GuiFactory
   {
     XTabPageModel tabPageModel = model.createTabPage(tabId); // 0 is not valid
     tabPageModel.setTitle(tabTitle);
-    tabPageModel.setEnabled(true);
 
     XTabPage xTabPage = null;
     try
@@ -553,8 +543,7 @@ public class GuiFactory
    *          Some additional properties.
    * @return A new dialog.
    */
-  public static XControl createDialog(XMultiComponentFactory xMCF, XComponentContext context,
-      XToolkit toolkit,
+  public static XControl createDialog(XMultiComponentFactory xMCF, XComponentContext context, XToolkit toolkit,
       XWindowPeer windowPeer, Rectangle size, SortedMap<String, Object> props)
   {
     return createControl(xMCF, context, toolkit, windowPeer, UnoComponent.CSS_AWT_UNO_CONTROL_DIALOG, props, size);
