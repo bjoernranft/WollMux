@@ -485,6 +485,12 @@ public class GuiFactory
   {
     return createControl(xMCF, context, UnoComponent.CSS_AWT_UNO_CONTROL_CONTAINER, props, size);
   }
+  
+  public static XControl createGraphicsControl(XMultiComponentFactory xMCF, XComponentContext context, Rectangle size,
+	      SortedMap<String, Object> props)
+  {
+	  return createControl(xMCF, context, "com.sun.star.awt.UnoControlImageControl", props, size);
+  }
 
   /**
    * Creates any control.
